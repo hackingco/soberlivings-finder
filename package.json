@@ -1,0 +1,27 @@
+{
+  "name": "sober-living-finder",
+  "version": "1.0.0",
+  "description": "A tool to find and analyze sober living and residential treatment facilities",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "fetch": "node src/fetchFacilities.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "sober-living",
+    "treatment-facilities", 
+    "addiction-recovery",
+    "healthcare"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "csv-writer": "^1.6.0",
+    "commander": "^11.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
