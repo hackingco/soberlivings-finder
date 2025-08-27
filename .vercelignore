@@ -1,0 +1,44 @@
+# Dependencies
+node_modules
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE files
+.vscode
+.idea
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build artifacts
+.next
+out
+dist
+
+# Coverage reports
+coverage
+
+# Testing
+__tests__
+*.test.*
+*.spec.*
+
+# Documentation (optional - remove if you want docs deployed)
+DEPLOYMENT.md
+
+# Database
+prisma/dev.db
+prisma/migrations
+
+# Temporary files
+*.tmp
+*.temp

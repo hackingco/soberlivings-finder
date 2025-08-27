@@ -1,0 +1,17 @@
+# Environment Variables Template
+# Fill in these values and then add them to Vercel
+
+# 1. SUPABASE SETUP
+# Go to supabase.com → Create project → Settings → API
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# 2. FIRECRAWL SETUP  
+# Go to firecrawl.dev → Get API key
+FIRECRAWL_API_KEY=fc-your-api-key-here
+
+# 3. FOR QUICK TESTING (Optional)
+# Use these temporary values to test deployment:
+# NEXT_PUBLIC_SUPABASE_URL=https://demo.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=demo-key
+# FIRECRAWL_API_KEY=demo-disabled
