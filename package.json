@@ -3,25 +3,46 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:setup": "prisma generate && prisma db push",
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
+    "@mendable/firecrawl-js": "^1.21.1",
+    "@prisma/client": "^6.15.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-toast": "^1.2.15",
+    "@supabase/supabase-js": "^2.56.0",
+    "@types/leaflet": "^1.9.20",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.12",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.542.0",
+    "next": "15.5.2",
+    "next-themes": "^0.4.6",
+    "prisma": "^6.15.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.2"
+    "react-leaflet": "^5.0.0",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

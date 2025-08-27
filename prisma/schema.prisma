@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Facility {
+  id          String   @id @default(cuid())
+  name        String
+  city        String
+  state       String
+  zip         String?
+  phone       String?
+  address     String?
+  website     String?
+  latitude    Float?
+  longitude   Float?
+  
+  // Core services
+  residentialServices String?
+  allServices        String?
+  
+  // Additional scraped data
+  description        String?
+  capacity          Int?
+  amenities         String[]
+  acceptedInsurance String[]
+  programs          String[]
+  
+  // Metadata
+  verified          Boolean  @default(false)
+  lastUpdated       DateTime @default(now()) @updatedAt
+  createdAt         DateTime @default(now())
+  
+  // Search metadata
+  searchLocation    String?
+  searchCoordinates String?
+  
+  // Reviews and ratings
+  reviews           Review[]
+  averageRating     Float?
+  
+  @@map("facilities")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  facilityId String
+  facility   Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  
+  rating     Int      // 1-5 stars
+  title      String?
+  content    String?
+  author     String?
+  
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("reviews")
+}
+
+model SearchQuery {
+  id        String   @id @default(cuid())
+  query     String
+  location  String?
+  filters   Json?
+  results   Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  @@map("search_queries")
+}
+
+model ScrapedData {
+  id         String   @id @default(cuid())
+  url        String   @unique
+  title      String?
+  content    String?
+  metadata   Json?
+  facilityId String?
+  
+  scrapedAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("scraped_data")
+}
