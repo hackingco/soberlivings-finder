@@ -19,8 +19,8 @@ export async function GET() {
   }
 
   // Database cleanup
+  const cleanupStartTime = Date.now()
   try {
-    const cleanupStartTime = Date.now()
     const cleanupResult = await dbMaintenance.cleanupDatabase()
     results.operations.push({
       name: 'database_cleanup',
