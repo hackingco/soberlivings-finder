@@ -303,18 +303,18 @@ function HomePageContent() {
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-lg -rotate-3 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
               <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-cyan/20 to-geometric-blue/20 backdrop-blur-xl rounded-lg border border-geometric-cyan/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
-                <div className="p-2 bg-purple-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
-                  <Sparkles className="h-5 w-5 text-purple-300 drop-shadow-glow" />
+                <div className="p-2 bg-geometric-cyan/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="h-5 w-5 text-cyan-300 drop-shadow-glow" />
                 </div>
                 <span className="font-bold text-white">AI Enhanced</span>
               </div>
             </div>
             
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 backdrop-blur-xl rounded-full border border-cyan-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
-                <div className="p-2 bg-cyan-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
-                  <MapPin className="h-5 w-5 text-cyan-300 drop-shadow-glow" />
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-lg rotate-2 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-blue/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-blue/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
+                <div className="p-2 bg-geometric-blue/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="h-5 w-5 text-blue-300 drop-shadow-glow" />
                 </div>
                 <span className="font-bold text-white">Nationwide</span>
               </div>
