@@ -37,11 +37,7 @@
   "crons": [
     {
       "path": "/api/maintenance/refresh-cache",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/maintenance/database-cleanup",
-      "schedule": "0 2 * * 0"
+      "schedule": "0 12 * * *"
     }
   ],
   
