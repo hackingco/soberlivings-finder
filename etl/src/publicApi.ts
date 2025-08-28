@@ -52,31 +52,40 @@ export async function fetchPublicFacilities(options: {
   
   try {
     logger.info(`Fetching from FindTreatment.gov API v2 with params:`, params);
+    
+    const response = await axios.get(baseUrl, { 
+      params: params,
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (compatible; ETL/1.0)'
+      },
+      timeout: 30000
+    });
+    
+    if (response.data) {
+      // The API returns data in a specific format
+      const data = response.data;
+      let facilities = [];
       
-      const response = await axios.get(endpoint.url, { 
-        params: endpoint.params,
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (compatible; ETL/1.0)'
-        },
-        timeout: 30000
-      });
-      
-      if (response.data) {
-        const facilities = Array.isArray(response.data) ? response.data : [];
-        logger.info(`Received ${facilities.length} facilities from ${endpoint.url}`);
-        
-        if (facilities.length > 0) {
-          return facilities;
-        }
+      // Handle the API response structure
+      if (data.rows && Array.isArray(data.rows)) {
+        facilities = data.rows;
+        logger.info(`Received ${facilities.length} facilities from page ${data.page} of ${data.totalPages}`);
+      } else if (Array.isArray(data)) {
+        facilities = data;
+        logger.info(`Received ${facilities.length} facilities`);
       }
-    } catch (error: any) {
-      logger.warn(`Failed to fetch from ${endpoint.url}:`, error.message);
+      
+      if (facilities.length > 0) {
+        return facilities;
+      }
     }
+  } catch (error: any) {
+    logger.warn(`Failed to fetch from FindTreatment.gov API:`, error.message);
   }
   
-  // If all endpoints fail, use mock data as fallback
-  logger.warn('All public endpoints failed, returning mock data');
+  // Fallback to mock data if API fails
+  logger.warn('API failed, returning mock data');
   return mockFacilities.slice(0, options.limit || 10);
 }
 
