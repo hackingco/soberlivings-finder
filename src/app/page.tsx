@@ -343,9 +343,9 @@ function HomePageContent() {
 
         {/* Enhanced Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-cyan/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-cyan/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-blue/25">
             <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+              <div className="p-4 bg-geometric-cyan/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
                 <Database className="h-8 w-8 text-cyan-300" />
               </div>
               <div className="text-right">
@@ -355,12 +355,12 @@ function HomePageContent() {
                 <p className="text-cyan-200 font-semibold text-lg">Treatment Facilities</p>
               </div>
             </div>
-            <div className="h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
+            <div className="h-1 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-full"></div>
           </div>
 
-          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+          <div className="bg-gradient-to-br from-geometric-emerald/20 to-geometric-green/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-green/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-emerald/25">
             <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-emerald-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+              <div className="p-4 bg-geometric-emerald/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
                 <TrendingUp className="h-8 w-8 text-emerald-300" />
               </div>
               <div className="text-right">
@@ -370,13 +370,13 @@ function HomePageContent() {
                 <p className="text-emerald-200 font-semibold text-lg">People Helped</p>
               </div>
             </div>
-            <div className="h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"></div>
+            <div className="h-1 bg-gradient-to-r from-geometric-emerald to-geometric-green rounded-full"></div>
           </div>
 
-          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-green/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-blue/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-blue/25">
             <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-purple-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
-                <Award className="h-8 w-8 text-purple-300" />
+              <div className="p-4 bg-geometric-blue/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <Award className="h-8 w-8 text-blue-300" />
               </div>
               <div className="text-right">
                 <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
@@ -385,7 +385,7 @@ function HomePageContent() {
                 <p className="text-purple-200 font-semibold text-lg">Success Rate</p>
               </div>
             </div>
-            <div className="h-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+            <div className="h-1 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-full"></div>
           </div>
         </div>
       </section>
