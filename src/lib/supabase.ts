@@ -340,7 +340,7 @@ export class SupabaseService {
     return this.executeWithRetry(async () => {
       return await this.client!
         .from('facilities')
-        .upsert(facility, {
+        .upsert(facility as any, {
           onConflict: 'id',
           ignoreDuplicates: false
         })
