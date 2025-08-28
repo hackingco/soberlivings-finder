@@ -38,8 +38,8 @@ export async function GET() {
   }
 
   // Create/update materialized views
+  const viewsStartTime = Date.now()
   try {
-    const viewsStartTime = Date.now()
     await dbMaintenance.createMaterializedViews()
     results.operations.push({
       name: 'update_materialized_views',
