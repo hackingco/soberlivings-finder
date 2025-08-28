@@ -12,6 +12,7 @@ import { Logger } from './utils/logger';
 import { DataValidator } from './utils/validator';
 import { MetricsCollector } from './utils/metrics';
 import { RateLimiter } from './utils/rateLimiter';
+import { mockFacilities, getMockApiResponse } from './mockData';
 import { 
   FacilityRecord, 
   TransformedFacility, 
