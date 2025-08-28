@@ -206,23 +206,28 @@ function transformFacility(facility: any): any {
 }
 
 /**
- * Parse services from various formats
+ * Parse services from API response format
+ * Services come as an array of objects with f1, f2, f3 fields
  */
 function parseServices(facility: any): string[] {
   const services: string[] = [];
   
-  // Check service fields
-  const serviceFields = [
-    'services', 'servicesCd', 'servicesProvided', 
-    'typeServices', 'categories'
-  ];
-  
-  for (const field of serviceFields) {
-    if (facility[field]) {
-      if (Array.isArray(facility[field])) {
-        services.push(...facility[field]);
-      } else if (typeof facility[field] === 'string') {
-        services.push(...facility[field].split(/[,;|]/).map((s: string) => s.trim()));
+  // Handle the API's service format
+  if (facility.services && Array.isArray(facility.services)) {
+    for (const service of facility.services) {
+      if (service.f3) {
+        // f3 contains the service description
+        services.push(service.f3);
+      }
+      
+      // Extract specific service types from codes
+      if (service.f2 === 'TC' && service.f3) {
+        // Type of Care
+        services.push(service.f3);
+      } else if (service.f2 === 'SET' && service.f3) {
+        // Service Setting
+        const settings = service.f3.split(';').map((s: string) => s.trim());
+        services.push(...settings);
       }
     }
   }
