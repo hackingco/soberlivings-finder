@@ -22,11 +22,7 @@ const nextConfig = {
   
   // Experimental features for performance
   experimental: {
-    // Enable server components runtime
-    serverComponentsExternalPackages: ['@prisma/client'],
-    
-    // Enable instrumentation for monitoring
-    instrumentationHook: true,
+    // Currently no experimental features needed
   },
   
   // Security and CORS headers
