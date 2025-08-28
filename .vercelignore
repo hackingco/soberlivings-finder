@@ -41,4 +41,4 @@ prisma/migrations
 
 # Temporary files
 *.tmp
-*.temp
+*.tempetl/
