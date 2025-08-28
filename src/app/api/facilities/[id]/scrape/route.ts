@@ -50,7 +50,7 @@ export async function POST(
       .update(updateData)
       .eq('id', id)
       .select()
-      .single()
+      .single() as { data: any, error: any }
     
     if (updateError) {
       console.error('Failed to update facility:', updateError)
