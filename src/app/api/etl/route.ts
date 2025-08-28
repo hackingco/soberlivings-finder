@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { ETLPipeline } from '@/etl/src/pipeline';
-import { ETLConfig } from '@/etl/src/types';
+import { ETLPipeline } from '../../../../etl/src/pipeline';
+import { ETLConfig } from '../../../../etl/src/types';
 
 // Validate API key for security
 function validateApiKey(request: NextRequest): boolean {
