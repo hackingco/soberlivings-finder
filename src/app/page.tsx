@@ -278,7 +278,7 @@ function HomePageContent() {
 
           <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
             Find Quality
-            <span className="block bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent animate-gradient">
+            <span className="block bg-gradient-to-r from-geometric-cyan via-geometric-blue to-geometric-green bg-clip-text text-transparent animate-gradient">
               Treatment Centers
             </span>
           </h2>
@@ -291,18 +291,18 @@ function HomePageContent() {
           {/* Premium Trust Indicators */}
           <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-xl rounded-full border border-emerald-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
-                <div className="p-2 bg-emerald-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="h-5 w-5 text-emerald-300 drop-shadow-glow" />
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-emerald to-geometric-green rounded-lg rotate-3 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-emerald/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-emerald/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
+                <div className="p-2 bg-geometric-emerald/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="h-5 w-5 text-green-300 drop-shadow-glow" />
                 </div>
                 <span className="font-bold text-white">Verified Facilities</span>
               </div>
             </div>
             
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-full border border-purple-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-lg -rotate-3 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-cyan/20 to-geometric-blue/20 backdrop-blur-xl rounded-lg border border-geometric-cyan/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
                 <div className="p-2 bg-purple-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
                   <Sparkles className="h-5 w-5 text-purple-300 drop-shadow-glow" />
                 </div>
