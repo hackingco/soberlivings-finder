@@ -614,12 +614,12 @@ function HomePageContent() {
       )}
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 via-slate-900 to-gray-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      <footer className="bg-gradient-to-r from-ocean-900 via-geometric-navy to-ocean-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-circuit-pattern opacity-10"></div>
         <div className="container-wide py-16 relative z-10">
           <div className="text-center">
             <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-3 shadow-lg">
+              <div className="bg-gradient-to-br from-geometric-blue to-geometric-cyan rounded-2xl p-3 shadow-lg">
                 <Search className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-3xl font-bold">SoberLiving Finder</h3>
