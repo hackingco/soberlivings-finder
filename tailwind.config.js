@@ -18,6 +18,16 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Add slate, indigo and purple shades for gradients
+        slate: {
+          950: '#020617',
+        },
+        indigo: {
+          950: '#1e1b4b',
+        },
+        purple: {
+          950: '#3b0764',
+        },
         // Modern healthcare/wellness color palette
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
