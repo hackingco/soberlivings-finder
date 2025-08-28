@@ -97,6 +97,13 @@ module.exports = {
         "fade-in": "fade-in 0.5s ease-in-out",
         "slide-in": "slide-in 0.3s ease-out",
         "bounce-subtle": "bounce-subtle 2s infinite",
+        // Enhanced UI animations
+        "blob": "blob 7s infinite",
+        "shimmer": "shimmer 2s infinite linear",
+        "gradient": "gradient 3s ease infinite",
+        "float": "float 3s ease-in-out infinite",
+        "glow": "glow 2s ease-in-out infinite alternate",
+        "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
         "accordion-down": {
@@ -119,11 +126,45 @@ module.exports = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-5px)" },
         },
+        // Enhanced UI keyframes
+        "blob": {
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "gradient": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        "glow": {
+          "from": { boxShadow: "0 0 20px #3b82f6" },
+          "to": { boxShadow: "0 0 40px #8b5cf6, 0 0 60px #8b5cf6" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" },
+          "50%": { opacity: "0.8", boxShadow: "0 0 40px rgba(139, 92, 246, 0.8)" },
+        },
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
         'large': '0 10px 40px -10px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.04)',
+        '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        '3xl': '0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+        'neon': '0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3)',
+      },
+      animationDelay: {
+        '2000': '2s',
+        '4000': '4s',
       },
     },
   },
