@@ -5,6 +5,7 @@
 
 import axios from 'axios';
 import { Logger } from './utils/logger';
+import { mockFacilities } from './mockData';
 
 const logger = new Logger('PublicAPI');
 
