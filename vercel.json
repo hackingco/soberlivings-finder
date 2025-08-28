@@ -1,6 +1,9 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "./build-vercel.sh",
   "devCommand": "npm run dev",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "env": {
+    "SKIP_ENV_VALIDATION": "true"
+  }
 }
