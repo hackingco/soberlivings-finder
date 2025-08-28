@@ -38,8 +38,8 @@ export async function GET() {
   }
 
   // Clear query cache to force fresh data
+  const cacheStartTime = Date.now()
   try {
-    const cacheStartTime = Date.now()
     optimizedPrisma.clearCache()
     results.operations.push({
       name: 'clear_query_cache',
@@ -56,8 +56,8 @@ export async function GET() {
   }
 
   // Analyze database performance
+  const analysisStartTime = Date.now()
   try {
-    const analysisStartTime = Date.now()
     const stats = await dbMaintenance.analyzeTablesPerformance()
     results.operations.push({
       name: 'analyze_database',
@@ -75,8 +75,8 @@ export async function GET() {
   }
 
   // Health check all systems
+  const healthStartTime = Date.now()
   try {
-    const healthStartTime = Date.now()
     const prismaHealth = await optimizedPrisma.healthCheck()
     const supabaseHealth = await supabaseService.healthCheck()
     
