@@ -110,8 +110,9 @@ export default function ModernFacilityCard({
   return (
     <Card 
       className={cn(
-        "group relative overflow-hidden bg-white shadow-soft hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-gray-100",
-        isInComparison && "ring-2 ring-primary ring-opacity-50 bg-primary/5",
+        "group relative overflow-hidden bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100/50",
+        isInComparison && "ring-2 ring-indigo-500 ring-opacity-60 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200",
+        "hover:border-indigo-200/50",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -119,8 +120,11 @@ export default function ModernFacilityCard({
       interactive
       hover
     >
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Enhanced gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-100/30 via-purple-100/20 to-pink-100/30 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+      
+      {/* Animated shimmer effect */}
+      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       
       <CardHeader className="relative pb-4">
         <div className="flex justify-between items-start">
@@ -128,7 +132,7 @@ export default function ModernFacilityCard({
             {/* Title and verification */}
             <div className="flex items-start gap-3">
               <div className="flex-1">
-                <h3 className="font-display text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors duration-200 line-clamp-2">
+                <h3 className="font-display text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors duration-300 line-clamp-2">
                   {facility.name}
                 </h3>
                 
@@ -146,10 +150,10 @@ export default function ModernFacilityCard({
                 </div>
               </div>
               
-              {/* Verification badge */}
+              {/* Enhanced verification badge */}
               {facility.verified && (
-                <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-medium border border-green-200">
-                  <Shield className="h-3 w-3" />
+                <div className="flex items-center gap-1 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-200/50 shadow-sm group-hover:shadow-md transition-all duration-300">
+                  <Shield className="h-3.5 w-3.5" />
                   <span>Verified</span>
                 </div>
               )}
@@ -181,7 +185,7 @@ export default function ModernFacilityCard({
             )}
           </div>
           
-          {/* Favorite button */}
+          {/* Enhanced favorite button */}
           <Button
             variant="ghost"
             size="icon"
@@ -189,11 +193,11 @@ export default function ModernFacilityCard({
               e.stopPropagation()
               setIsFavorited(!isFavorited)
             }}
-            className="h-8 w-8 text-gray-400 hover:text-red-500"
+            className="h-9 w-9 text-gray-400 hover:text-pink-500 hover:bg-pink-50 transition-all duration-300"
           >
             <Heart className={cn(
-              "h-4 w-4 transition-colors",
-              isFavorited ? "fill-red-500 text-red-500" : ""
+              "h-4 w-4 transition-all duration-300",
+              isFavorited ? "fill-pink-500 text-pink-500 scale-110" : "hover:scale-110"
             )} />
           </Button>
         </div>
@@ -334,8 +338,8 @@ export default function ModernFacilityCard({
           </div>
         )}
         
-        {/* Action buttons */}
-        <div className="flex gap-2 pt-4">
+        {/* Enhanced action buttons */}
+        <div className="flex gap-3 pt-4">
           <Button 
             variant="outline" 
             size="sm" 
@@ -343,8 +347,8 @@ export default function ModernFacilityCard({
               e.stopPropagation()
               onViewDetails(facility)
             }}
-            className="flex-1 group/btn hover:border-primary hover:text-primary transition-all duration-200"
-            leftIcon={<Info className="h-4 w-4" />}
+            className="flex-1 group/btn border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-300 font-medium"
+            leftIcon={<Info className="h-4 w-4 group-hover/btn:scale-110 transition-transform duration-300" />}
           >
             View Details
           </Button>
@@ -356,8 +360,8 @@ export default function ModernFacilityCard({
               e.stopPropagation()
               onGetDirections(facility)
             }}
-            className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-200"
-            leftIcon={<MapPin className="h-4 w-4" />}
+            className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 font-medium border-0"
+            leftIcon={<MapPin className="h-4 w-4 group-hover/btn:scale-110 transition-transform duration-300" />}
           >
             Directions
           </Button>
