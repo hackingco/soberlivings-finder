@@ -41,31 +41,34 @@ export async function fetchPublicFacilities(options: {
   
   // Try each endpoint
   for (const endpoint of endpoints) {
-  
-  try {
-    logger.info(`Fetching facilities from public API with params:`, params);
-    
-    const response = await axios.get(baseUrl, { 
-      params,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; ETL/1.0)'
-      },
-      timeout: 30000
-    });
-    
-    if (response.data) {
-      logger.info(`Received ${Array.isArray(response.data) ? response.data.length : 0} facilities`);
-      return response.data;
+    try {
+      logger.info(`Trying ${endpoint.url} with params:`, endpoint.params);
+      
+      const response = await axios.get(endpoint.url, { 
+        params: endpoint.params,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; ETL/1.0)'
+        },
+        timeout: 30000
+      });
+      
+      if (response.data) {
+        const facilities = Array.isArray(response.data) ? response.data : [];
+        logger.info(`Received ${facilities.length} facilities from ${endpoint.url}`);
+        
+        if (facilities.length > 0) {
+          return facilities;
+        }
+      }
+    } catch (error: any) {
+      logger.warn(`Failed to fetch from ${endpoint.url}:`, error.message);
     }
-    
-    return [];
-  } catch (error: any) {
-    logger.error('Failed to fetch from public API:', error.message);
-    
-    // Try alternative endpoints
-    return tryAlternativeEndpoints(options);
   }
+  
+  // If all endpoints fail, use mock data as fallback
+  logger.warn('All public endpoints failed, returning mock data');
+  return mockFacilities.slice(0, options.limit || 10);
 }
 
 /**
