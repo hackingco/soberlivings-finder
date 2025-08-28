@@ -71,7 +71,7 @@ export default function EnhancedFacilitySearch({
   // Refs for better UX
   const searchInputRef = useRef<HTMLInputElement>(null)
   const locationInputRef = useRef<HTMLInputElement>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout>()
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Performance monitoring
   const measureRender = useMemo(() => {
