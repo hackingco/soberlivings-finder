@@ -236,36 +236,38 @@ function HomePageContent() {
         <div className="text-center mb-20">
           <div className="inline-block">
             <div className="relative group">
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-[3rem] blur-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-soft"></div>
+              {/* Geometric glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue via-geometric-cyan to-geometric-green rounded-[3rem] blur-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-soft"></div>
               
               {/* Main header container */}
               <div className="relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-3xl rounded-[3rem] p-12 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:border-white/30">
                 <div className="flex items-center gap-10">
                   {/* Logo */}
                   <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl blur-2xl opacity-80"></div>
-                    <div className="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-8 shadow-2xl animate-morph">
+                    <div className="absolute inset-0 bg-gradient-to-br from-geometric-blue to-geometric-cyan rounded-full blur-2xl opacity-80"></div>
+                    <div className="relative bg-gradient-to-br from-geometric-blue via-geometric-cyan to-geometric-emerald rounded-full p-8 shadow-2xl animate-morph">
                       <Search className="h-20 w-20 text-white drop-shadow-lg" />
+                      <div className="absolute -inset-4 border-2 border-geometric-cyan/30 rounded-full animate-pulse"></div>
+                      <div className="absolute -inset-8 border border-geometric-green/20 rounded-full animate-pulse animation-delay-2000"></div>
                     </div>
                   </div>
                   
                   {/* Text */}
                   <div className="text-left">
                     <div className="flex items-center gap-4 mb-3">
-                      <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                      <Badge className="bg-gradient-to-r from-geometric-blue to-geometric-cyan text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
                         AI Powered
                       </Badge>
-                      <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                      <Badge className="bg-gradient-to-r from-geometric-emerald to-geometric-green text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
                         Verified Data
                       </Badge>
                     </div>
                     <h1 className="text-6xl lg:text-8xl font-black tracking-tighter leading-none">
-                      <span className="bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_100%]">
+                      <span className="text-gradient-geometric">
                         SoberLiving
                       </span>
                     </h1>
-                    <p className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent tracking-[0.2em] mt-2">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-geometric-cyan to-geometric-green bg-clip-text text-transparent tracking-[0.2em] mt-2">
                       FINDER
                     </p>
                   </div>
