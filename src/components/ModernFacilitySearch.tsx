@@ -154,22 +154,22 @@ export default function ModernFacilitySearch({
   const activeFiltersCount = filters.services.length + filters.acceptsInsurance.length
 
   return (
-    <div className={cn("w-full space-y-4", className)}>
-      {/* Main search card */}
+    <div className={cn("w-full space-y-3 sm:space-y-4", className)}>
+      {/* Main search card - Mobile Optimized */}
       <Card className="bg-white/90 backdrop-blur-sm shadow-medium border-0 overflow-hidden hover-lift card-glow-primary">
-        <CardContent className="p-6">
-          {/* Primary search bar */}
-          <div className="flex flex-col lg:flex-row gap-4 mb-4">
+        <CardContent className="p-3 sm:p-4 lg:p-6">
+          {/* Primary search bar - Mobile Responsive */}
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 mb-3 sm:mb-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
                 ref={searchInputRef}
-                placeholder="Search for treatment facilities, services, or programs... (Ctrl+K)"
+                placeholder="Search facilities, services..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowRecentSearches(recentSearches.length > 0)}
                 onBlur={() => setTimeout(() => setShowRecentSearches(false), 200)}
-                className="pl-12 pr-10 h-12 text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
+                className="pl-10 sm:pl-12 pr-8 sm:pr-10 h-10 sm:h-12 text-sm sm:text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
               {query && (
@@ -206,27 +206,27 @@ export default function ModernFacilitySearch({
               )}
             </div>
             
-            <div className="lg:w-64 relative">
-              <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="w-full lg:w-64 relative">
+              <MapPin className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 sm:h-5 w-4 sm:w-5 text-gray-400" />
               <Input
                 ref={locationInputRef}
                 placeholder="City, State or ZIP"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="pl-12 h-12 text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
+                className="pl-10 sm:pl-12 h-10 sm:h-12 text-sm sm:text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full lg:w-auto">
               {onSaveSearch && (query || location) && (
                 <Button
                   variant="outline"
                   onClick={handleSaveSearch}
-                  className="h-12 px-4 border-gray-200 hover:border-primary hover:text-primary transition-all duration-200"
+                  className="h-10 sm:h-12 px-3 sm:px-4 border-gray-200 hover:border-primary hover:text-primary transition-all duration-200"
                   title="Save this search"
                 >
-                  <Bookmark className="h-4 w-4" />
+                  <Bookmark className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
                 </Button>
               )}
               
@@ -234,8 +234,8 @@ export default function ModernFacilitySearch({
                 onClick={handleSearch} 
                 loading={loading}
                 variant="gradient"
-                className="h-12 px-8 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
-                leftIcon={!loading ? <Search className="h-5 w-5" /> : undefined}
+                className="h-10 sm:h-12 px-4 sm:px-8 text-white text-sm sm:text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift flex-1 lg:flex-none"
+                leftIcon={!loading ? <Search className="h-4 sm:h-5 w-4 sm:w-5" /> : undefined}
               >
                 {loading ? 'Searching...' : 'Search'}
               </Button>
