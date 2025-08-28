@@ -328,8 +328,8 @@ function HomePageContent() {
             {/* Animated gradient border */}
             <div className="absolute -inset-1 bg-gradient-to-r from-geometric-blue via-geometric-cyan to-geometric-green rounded-[2.5rem] blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-gradient-shift bg-[length:200%_200%]"></div>
             
-            {/* Search container */}
-            <div className="relative bg-white/98 backdrop-blur-3xl rounded-[2rem] p-12 shadow-2xl border border-white/80 hover:shadow-3xl transition-all duration-500">
+            {/* Search container - Mobile Optimized */}
+            <div className="relative bg-white/98 backdrop-blur-3xl rounded-xl sm:rounded-2xl lg:rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-12 shadow-xl sm:shadow-2xl border border-white/80 hover:shadow-3xl transition-all duration-500">
               <ModernFacilitySearch 
                 onSearch={handleSearch} 
                 loading={loading}
@@ -341,48 +341,48 @@ function HomePageContent() {
           </div>
         </div>
 
-        {/* Enhanced Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-cyan/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-cyan/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-blue/25">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-geometric-cyan/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
-                <Database className="h-8 w-8 text-cyan-300" />
+        {/* Enhanced Stats Section - Mobile Responsive */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-cyan/10 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-geometric-cyan/30 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 group sm:hover:-translate-y-3 hover:bg-geometric-blue/25">
+            <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
+              <div className="p-2 sm:p-3 lg:p-4 bg-geometric-cyan/20 backdrop-blur-sm rounded-lg sm:rounded-xl lg:rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <Database className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-cyan-300" />
               </div>
               <div className="text-right">
-                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1 sm:mb-2 group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-300">
                   {stats.totalFacilities.toLocaleString()}
                 </div>
-                <p className="text-cyan-200 font-semibold text-lg">Treatment Facilities</p>
+                <p className="text-cyan-200 font-semibold text-xs sm:text-sm lg:text-lg">Treatment Facilities</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-full"></div>
           </div>
 
-          <div className="bg-gradient-to-br from-geometric-emerald/20 to-geometric-green/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-green/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-emerald/25">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-geometric-emerald/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
-                <TrendingUp className="h-8 w-8 text-emerald-300" />
+          <div className="bg-gradient-to-br from-geometric-emerald/20 to-geometric-green/10 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-geometric-green/30 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 group sm:hover:-translate-y-3 hover:bg-geometric-emerald/25">
+            <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
+              <div className="p-2 sm:p-3 lg:p-4 bg-geometric-emerald/20 backdrop-blur-sm rounded-lg sm:rounded-xl lg:rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-emerald-300" />
               </div>
               <div className="text-right">
-                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1 sm:mb-2 group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-300">
                   {stats.totalSearches.toLocaleString()}
                 </div>
-                <p className="text-emerald-200 font-semibold text-lg">People Helped</p>
+                <p className="text-emerald-200 font-semibold text-xs sm:text-sm lg:text-lg">People Helped</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-geometric-emerald to-geometric-green rounded-full"></div>
           </div>
 
-          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-green/10 backdrop-blur-xl rounded-2xl p-8 border border-geometric-blue/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-geometric-blue/25">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-4 bg-geometric-blue/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
-                <Award className="h-8 w-8 text-blue-300" />
+          <div className="bg-gradient-to-br from-geometric-blue/20 to-geometric-green/10 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-geometric-blue/30 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 group sm:hover:-translate-y-3 hover:bg-geometric-blue/25">
+            <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
+              <div className="p-2 sm:p-3 lg:p-4 bg-geometric-blue/20 backdrop-blur-sm rounded-lg sm:rounded-xl lg:rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-300" />
               </div>
               <div className="text-right">
-                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1 sm:mb-2 group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-300">
                   94%
                 </div>
-                <p className="text-blue-200 font-semibold text-sm sm:text-base lg:text-lg">Success Rate</p>
+                <p className="text-blue-200 font-semibold text-xs sm:text-sm lg:text-lg">Success Rate</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-full"></div>
