@@ -242,17 +242,17 @@ export default function ModernFacilitySearch({
             </div>
           </div>
 
-          {/* Quick actions and saved searches */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600 font-medium mr-2">Quick locations:</span>
-              {quickLocations.slice(0, 4).map((loc) => (
+          {/* Quick actions and saved searches - Mobile Responsive */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="text-xs sm:text-sm text-gray-600 font-medium mr-1 sm:mr-2">Quick:</span>
+              {quickLocations.slice(0, 3).map((loc) => (
                 <Button
                   key={loc}
                   variant="outline"
                   size="sm"
                   onClick={() => setLocation(loc === 'Current Location' ? '' : loc)}
-                  className="text-xs h-8 text-gray-600 hover:text-primary hover:border-primary transition-colors"
+                  className="text-[10px] sm:text-xs h-7 sm:h-8 px-2 sm:px-3 text-gray-600 hover:text-primary hover:border-primary transition-colors"
                 >
                   {loc}
                 </Button>
@@ -301,17 +301,17 @@ export default function ModernFacilitySearch({
             )}
           </div>
 
-          {/* Filters toggle */}
+          {/* Filters toggle - Mobile Responsive */}
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-gray-600 hover:text-primary p-0 h-auto"
+              className="flex items-center gap-1.5 sm:gap-2 text-gray-600 hover:text-primary p-0 h-auto text-sm sm:text-base"
             >
-              <Sliders className="h-4 w-4" />
-              Advanced Filters
+              <Sliders className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+              <span className="text-xs sm:text-sm">Advanced Filters</span>
               <ChevronDown className={cn(
-                "h-4 w-4 transition-transform duration-200",
+                "h-3.5 sm:h-4 w-3.5 sm:w-4 transition-transform duration-200",
                 showFilters && "rotate-180"
               )} />
             </Button>
