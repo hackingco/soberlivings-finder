@@ -326,7 +326,7 @@ function HomePageContent() {
         <div className="max-w-6xl mx-auto mb-20">
           <div className="relative group">
             {/* Animated gradient border */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-[2.5rem] blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-gradient-shift bg-[length:200%_200%]"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-geometric-blue via-geometric-cyan to-geometric-green rounded-[2.5rem] blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-gradient-shift bg-[length:200%_200%]"></div>
             
             {/* Search container */}
             <div className="relative bg-white/98 backdrop-blur-3xl rounded-[2rem] p-12 shadow-2xl border border-white/80 hover:shadow-3xl transition-all duration-500">
