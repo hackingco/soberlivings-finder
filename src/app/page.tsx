@@ -219,33 +219,57 @@ function HomePageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative">
-      {/* Animated background elements - Updated */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 relative overflow-x-hidden">
+      {/* Enhanced Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob"></div>
-        <div className="absolute top-1/3 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 -right-20 w-96 h-96 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-40 w-96 h-96 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-transparent via-indigo-950/50 to-slate-950 opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-slate-950/80"></div>
       </div>
 
       {/* Hero Section */}
       <section className="relative z-10 container-wide py-20">
-        {/* Modern header with glassmorphism */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-8 mb-12 p-10 bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-500">
+        {/* Ultra-Modern Header */}
+        <div className="text-center mb-20">
+          <div className="inline-block">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-3xl p-6 shadow-2xl group-hover:scale-110 transition-transform duration-500">
-                <Search className="h-16 w-16 text-white" />
+              {/* Glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-[3rem] blur-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-soft"></div>
+              
+              {/* Main header container */}
+              <div className="relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-3xl rounded-[3rem] p-12 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:border-white/30">
+                <div className="flex items-center gap-10">
+                  {/* Logo */}
+                  <div className="relative group-hover:scale-110 transition-transform duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl blur-2xl opacity-80"></div>
+                    <div className="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-8 shadow-2xl animate-morph">
+                      <Search className="h-20 w-20 text-white drop-shadow-lg" />
+                    </div>
+                  </div>
+                  
+                  {/* Text */}
+                  <div className="text-left">
+                    <div className="flex items-center gap-4 mb-3">
+                      <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                        AI Powered
+                      </Badge>
+                      <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                        Verified Data
+                      </Badge>
+                    </div>
+                    <h1 className="text-6xl lg:text-8xl font-black tracking-tighter leading-none">
+                      <span className="bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_100%]">
+                        SoberLiving
+                      </span>
+                    </h1>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent tracking-[0.2em] mt-2">
+                      FINDER
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="text-left">
-              <h1 className="text-7xl md:text-8xl font-black tracking-tight leading-none">
-                <span className="bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                  SoberLiving
-                </span>
-              </h1>
-              <p className="text-2xl font-bold text-white/90 tracking-[0.3em] mt-2">FINDER</p>
             </div>
           </div>
 
@@ -261,39 +285,56 @@ function HomePageContent() {
             and recovery programs with AI-enhanced data and real-time availability.
           </p>
           
-          {/* Trust indicators with modern design */}
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
-              <div className="p-2 bg-emerald-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
-                <Shield className="h-6 w-6 text-emerald-300" />
+          {/* Premium Trust Indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-xl rounded-full border border-emerald-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div className="p-2 bg-emerald-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="h-5 w-5 text-emerald-300 drop-shadow-glow" />
+                </div>
+                <span className="font-bold text-white">Verified Facilities</span>
               </div>
-              <span className="font-bold text-white text-lg">Verified Facilities</span>
             </div>
-            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
-              <div className="p-2 bg-purple-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
-                <Sparkles className="h-6 w-6 text-purple-300" />
+            
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-full border border-purple-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div className="p-2 bg-purple-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="h-5 w-5 text-purple-300 drop-shadow-glow" />
+                </div>
+                <span className="font-bold text-white">AI Enhanced</span>
               </div>
-              <span className="font-bold text-white text-lg">AI Enhanced</span>
             </div>
-            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
-              <div className="p-2 bg-cyan-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
-                <MapPin className="h-6 w-6 text-cyan-300" />
+            
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity"></div>
+              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 backdrop-blur-xl rounded-full border border-cyan-400/30 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div className="p-2 bg-cyan-500/30 backdrop-blur-sm rounded-full group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="h-5 w-5 text-cyan-300 drop-shadow-glow" />
+                </div>
+                <span className="font-bold text-white">Nationwide</span>
               </div>
-              <span className="font-bold text-white text-lg">50 States</span>
             </div>
           </div>
         </div>
 
-        {/* Modern Search Section */}
-        <div className="max-w-6xl mx-auto mb-16">
-          <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] p-10 shadow-2xl border border-white/50 hover:shadow-3xl transition-all duration-500">
-            <ModernFacilitySearch 
-              onSearch={handleSearch} 
-              loading={loading}
-              recentSearches={recentSearches}
-              onSaveSearch={handleSaveSearch}
-              savedSearches={savedSearches}
-            />
+        {/* Ultra-Modern Search Section */}
+        <div className="max-w-6xl mx-auto mb-20">
+          <div className="relative group">
+            {/* Animated gradient border */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-[2.5rem] blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500 animate-gradient-shift bg-[length:200%_200%]"></div>
+            
+            {/* Search container */}
+            <div className="relative bg-white/98 backdrop-blur-3xl rounded-[2rem] p-12 shadow-2xl border border-white/80 hover:shadow-3xl transition-all duration-500">
+              <ModernFacilitySearch 
+                onSearch={handleSearch} 
+                loading={loading}
+                recentSearches={recentSearches}
+                onSaveSearch={handleSaveSearch}
+                savedSearches={savedSearches}
+              />
+            </div>
           </div>
         </div>
 
