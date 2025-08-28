@@ -153,23 +153,33 @@ export function transformPublicApiResponse(data: any): any[] {
 
 /**
  * Transform a single facility from public API format
+ * Based on the official API response structure
  */
 function transformFacility(facility: any): any {
   return {
-    // Map common field variations
-    id: facility.id || facility.frid || facility.facilityId,
+    // Map fields from API response
+    id: facility._irow || facility.id || Math.random().toString(36),
     facilityName: facility.name1 || facility.facilityName || facility.name,
+    name2: facility.name2, // Secondary name
     street1: facility.street1 || facility.address1 || facility.street,
     street2: facility.street2 || facility.address2,
     city: facility.city,
     state: facility.state,
-    zip: facility.zip || facility.zip5,
+    zip: facility.zip,
     phone: facility.phone || facility.phoneNumber,
+    intake1: facility.intake1, // Intake phone
+    hotline1: facility.hotline1, // Hotline phone
     website: facility.website || facility.url,
     
     // Coordinates
-    latitude: facility.latitude || facility.lat,
-    longitude: facility.longitude || facility.lng || facility.lon,
+    latitude: parseFloat(facility.latitude) || facility.lat,
+    longitude: parseFloat(facility.longitude) || facility.lng || facility.lon,
+    
+    // Distance from search point
+    miles: facility.miles,
+    
+    // Facility type
+    type_facility: facility.type_facility,
     
     // Services - may be in different formats
     services: parseServices(facility),
