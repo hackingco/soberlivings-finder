@@ -219,67 +219,74 @@ function HomePageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative">
       {/* Animated background elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute top-1/3 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-1/4 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob"></div>
+        <div className="absolute top-1/3 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-screen filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
       </div>
 
       {/* Hero Section */}
       <section className="relative z-10 container-wide py-20">
         {/* Modern header with glassmorphism */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-6 mb-8 p-8 bg-white/20 backdrop-blur-lg rounded-3xl border border-white/30 shadow-xl">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-60"></div>
-              <div className="relative bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl p-4 shadow-2xl">
-                <Search className="h-12 w-12 text-white" />
+          <div className="inline-flex items-center gap-8 mb-12 p-10 bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-500">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-3xl p-6 shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                <Search className="h-16 w-16 text-white" />
               </div>
             </div>
             <div className="text-left">
-              <h1 className="text-6xl md:text-7xl font-black tracking-tight">
-                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-7xl md:text-8xl font-black tracking-tight leading-none">
+                <span className="bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
                   SoberLiving
                 </span>
               </h1>
-              <p className="text-xl font-semibold text-gray-700 tracking-wider">Finder</p>
+              <p className="text-2xl font-bold text-white/90 tracking-[0.3em] mt-2">FINDER</p>
             </div>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
             Find Quality
-            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent animate-gradient">
+            <span className="block bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent animate-gradient">
               Treatment Centers
             </span>
           </h2>
           
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto mb-12 leading-relaxed font-medium">
             Search thousands of verified residential treatment facilities, sober living homes, 
             and recovery programs with AI-enhanced data and real-time availability.
           </p>
           
           {/* Trust indicators with modern design */}
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
-              <Shield className="h-6 w-6 text-emerald-500" />
-              <span className="font-semibold text-gray-700">Verified Facilities</span>
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
+              <div className="p-2 bg-emerald-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
+                <Shield className="h-6 w-6 text-emerald-300" />
+              </div>
+              <span className="font-bold text-white text-lg">Verified Facilities</span>
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
-              <Sparkles className="h-6 w-6 text-purple-500" />
-              <span className="font-semibold text-gray-700">AI Enhanced</span>
+            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
+              <div className="p-2 bg-purple-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
+                <Sparkles className="h-6 w-6 text-purple-300" />
+              </div>
+              <span className="font-bold text-white text-lg">AI Enhanced</span>
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
-              <MapPin className="h-6 w-6 text-blue-500" />
-              <span className="font-semibold text-gray-700">50 States</span>
+            <div className="flex items-center gap-4 px-8 py-4 bg-white/20 backdrop-blur-lg rounded-full border border-white/30 shadow-xl hover:bg-white/25 transition-all duration-300 group">
+              <div className="p-2 bg-cyan-500/20 rounded-full group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="h-6 w-6 text-cyan-300" />
+              </div>
+              <span className="font-bold text-white text-lg">50 States</span>
             </div>
           </div>
         </div>
 
         {/* Modern Search Section */}
-        <div className="max-w-5xl mx-auto mb-16">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40">
+        <div className="max-w-6xl mx-auto mb-16">
+          <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] p-10 shadow-2xl border border-white/50 hover:shadow-3xl transition-all duration-500">
             <ModernFacilitySearch 
               onSearch={handleSearch} 
               loading={loading}
@@ -292,50 +299,50 @@ function HomePageContent() {
 
         {/* Enhanced Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">Treatment Facilities</CardTitle>
-              <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                <Database className="h-6 w-6 text-blue-600" />
+          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-blue-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <Database className="h-8 w-8 text-cyan-300" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-gray-900 mb-2">
-                {stats.totalFacilities.toLocaleString()}
+              <div className="text-right">
+                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {stats.totalFacilities.toLocaleString()}
+                </div>
+                <p className="text-cyan-200 font-semibold text-lg">Treatment Facilities</p>
               </div>
-              <p className="text-sm text-gray-600">Verified nationwide</p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="h-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"></div>
+          </div>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">Successful Searches</CardTitle>
-              <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
-                <TrendingUp className="h-6 w-6 text-emerald-600" />
+          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-emerald-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <TrendingUp className="h-8 w-8 text-emerald-300" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-gray-900 mb-2">
-                {stats.totalSearches.toLocaleString()}
+              <div className="text-right">
+                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {stats.totalSearches.toLocaleString()}
+                </div>
+                <p className="text-emerald-200 font-semibold text-lg">People Helped</p>
               </div>
-              <p className="text-sm text-gray-600">People helped</p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="h-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full"></div>
+          </div>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">Success Rate</CardTitle>
-              <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                <Award className="h-6 w-6 text-purple-600" />
+          <div className="bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/30 shadow-2xl hover:shadow-3xl transition-all duration-500 group hover:-translate-y-3 hover:bg-white/25">
+            <div className="flex items-center justify-between mb-6">
+              <div className="p-4 bg-purple-500/20 backdrop-blur-sm rounded-2xl group-hover:scale-110 transition-all duration-300">
+                <Award className="h-8 w-8 text-purple-300" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-gray-900 mb-2">
-                94%
+              <div className="text-right">
+                <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                  94%
+                </div>
+                <p className="text-purple-200 font-semibold text-lg">Success Rate</p>
               </div>
-              <p className="text-sm text-gray-600">Find quality care</p>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="h-1 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+          </div>
         </div>
       </section>
 

@@ -177,35 +177,61 @@
     50% { transform: translateY(-20px); }
   }
 
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
+     @keyframes shimmer {
+     0% { background-position: -200% 0; }
+     100% { background-position: 200% 0; }
+   }
 
-  .animate-blob {
-    animation: blob 7s infinite;
-  }
+   @keyframes glow {
+     0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+     50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6); }
+   }
 
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
+   @keyframes pulse-glow {
+     0%, 100% { 
+       transform: scale(1);
+       filter: brightness(1);
+     }
+     50% { 
+       transform: scale(1.05);
+       filter: brightness(1.2);
+     }
+   }
 
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
+   .animate-blob {
+     animation: blob 7s infinite;
+   }
 
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 3s ease infinite;
-  }
+   .animation-delay-2000 {
+     animation-delay: 2s;
+   }
 
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
+   .animation-delay-4000 {
+     animation-delay: 4s;
+   }
 
-  .animate-shimmer {
-    animation: shimmer 2s infinite linear;
-  }
+   .animate-gradient {
+     background-size: 200% 200%;
+     animation: gradient 3s ease infinite;
+   }
+
+   .animate-float {
+     animation: float 3s ease-in-out infinite;
+   }
+
+   .animate-shimmer {
+     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+     background-size: 200% 100%;
+     animation: shimmer 2s infinite linear;
+   }
+
+   .animate-glow {
+     animation: glow 2s ease-in-out infinite;
+   }
+
+   .animate-pulse-glow {
+     animation: pulse-glow 2s ease-in-out infinite;
+   }
 
   /* Glassmorphism effects */
   .glass {
@@ -590,9 +616,21 @@
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 8px 32px rgba(59, 130, 246, 0.1);
 }
 
-.shadow-colored {
-  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2), 0 20px 25px -5px rgba(59, 130, 246, 0.1);
-}
+  .shadow-colored {
+    box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2), 0 20px 25px -5px rgba(59, 130, 246, 0.1);
+  }
+
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25), 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  .shadow-neon {
+    box-shadow: 
+      0 0 5px rgba(59, 130, 246, 0.5),
+      0 0 10px rgba(59, 130, 246, 0.3),
+      0 0 15px rgba(59, 130, 246, 0.2),
+      0 0 20px rgba(59, 130, 246, 0.1);
+  }
 
 @keyframes slide-out-right {
   from {
