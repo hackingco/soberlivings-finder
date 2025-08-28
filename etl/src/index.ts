@@ -3,12 +3,13 @@
  */
 
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 import { ETLScheduler, SCHEDULE_PATTERNS } from './scheduler';
 import { ETLConfig } from './types';
 import { Logger } from './utils/logger';
 
-// Load environment variables
-dotenv.config({ path: '.env.local' });
+// Load environment variables from parent directory
+dotenv.config({ path: path.join(__dirname, '../../.env.local') });
 
 // Create logger
 const logger = new Logger('ETL');
