@@ -37,15 +37,26 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Add slate, indigo and purple shades for gradients
-        slate: {
-          950: '#020617',
+        // Geometric blue-green color palette
+        ocean: {
+          50: '#E0F2FE',
+          100: '#BAE6FD',
+          200: '#7DD3FC',
+          300: '#38BDF8',
+          400: '#0EA5E9',
+          500: '#2980B9',
+          600: '#0369A1',
+          700: '#075985',
+          800: '#0C4A6E',
+          900: '#0D1B2A',
+          950: '#0D1B2A',
         },
-        indigo: {
-          950: '#1e1b4b',
-        },
-        purple: {
-          950: '#3b0764',
+        geometric: {
+          blue: '#2196F3',
+          cyan: '#38BDF8',
+          green: '#4CAF50',
+          emerald: '#10B981',
+          navy: '#0D1B2A',
         },
         // Modern healthcare/wellness color palette
         border: "hsl(var(--border))",
@@ -56,16 +67,16 @@ module.exports = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: '#E3F2FD',
+          100: '#BBDEFB',
+          200: '#90CAF9',
+          300: '#64B5F6',
+          400: '#42A5F5',
+          500: '#2196F3',
+          600: '#1E88E5',
+          700: '#1976D2',
+          800: '#1565C0',
+          900: '#0D47A1',
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -93,10 +104,10 @@ module.exports = {
         },
         // Custom wellness colors
         wellness: {
-          green: '#10b981',
-          blue: '#3b82f6',
-          purple: '#8b5cf6',
-          teal: '#14b8a6',
+          green: '#4CAF50',
+          blue: '#2196F3',
+          cyan: '#38BDF8',
+          emerald: '#10B981',
         },
         // Status colors
         success: '#059669',
