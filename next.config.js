@@ -3,9 +3,6 @@ const nextConfig = {
   // Enable React strict mode for better development
   reactStrictMode: true,
   
-  // Enable SWC minification
-  swcMinify: true,
-  
   // Server components configuration
   serverExternalPackages: ['@prisma/client'],
   outputFileTracingRoot: __dirname,
