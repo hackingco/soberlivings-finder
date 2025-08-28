@@ -266,8 +266,8 @@ async function searchMockData(searchQuery: SearchQuery) {
       }
       
       // Then by data quality if available
-      const aQuality = a.dataQuality || 0
-      const bQuality = b.dataQuality || 0
+      const aQuality = (a as any).dataQuality || 0
+      const bQuality = (b as any).dataQuality || 0
       if (aQuality !== bQuality) {
         return bQuality - aQuality
       }
