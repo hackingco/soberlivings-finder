@@ -1,0 +1,137 @@
+{
+  "timestamp": "2025-08-28T04:16:37.920Z",
+  "overallScore": 85,
+  "results": {
+    "api": {
+      "passed": 8,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Basic Search Functionality",
+          "passed": true,
+          "responseTime": 3668,
+          "statusCode": 200
+        },
+        {
+          "name": "Search with Location Filter",
+          "passed": true,
+          "responseTime": 3277,
+          "statusCode": 200
+        },
+        {
+          "name": "Search with Service Filter",
+          "passed": true,
+          "responseTime": 3327,
+          "statusCode": 200
+        },
+        {
+          "name": "Search with Insurance Filter",
+          "passed": true,
+          "responseTime": 3489,
+          "statusCode": 200
+        },
+        {
+          "name": "Complex Multi-Filter Search",
+          "passed": true,
+          "responseTime": 3271,
+          "statusCode": 200
+        },
+        {
+          "name": "Invalid Parameter Handling",
+          "passed": true,
+          "responseTime": 46,
+          "statusCode": 400
+        },
+        {
+          "name": "Metrics Endpoint",
+          "passed": true,
+          "responseTime": 30,
+          "statusCode": 200
+        },
+        {
+          "name": "Database Initialization",
+          "passed": true,
+          "responseTime": 105,
+          "statusCode": 200
+        }
+      ]
+    },
+    "deployment": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Environment Configuration",
+          "passed": true,
+          "message": "Environment files found"
+        },
+        {
+          "name": "Build Configuration",
+          "passed": true,
+          "message": "Build scripts configured"
+        },
+        {
+          "name": "Static Assets",
+          "passed": true,
+          "message": "Public: true, Manifest: true"
+        },
+        {
+          "name": "Next.js Configuration",
+          "passed": true,
+          "message": "Standalone build configured"
+        }
+      ]
+    },
+    "data": {
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Data Export Formats",
+          "passed": true
+        }
+      ]
+    },
+    "performance": {
+      "passed": 0,
+      "failed": 2,
+      "tests": [
+        {
+          "name": "API Response Time",
+          "passed": false,
+          "avgTime": 3271,
+          "maxTime": 3302,
+          "threshold": 2000
+        },
+        {
+          "name": "Large Result Set",
+          "passed": false,
+          "avgTime": 3267,
+          "maxTime": 3338,
+          "threshold": 3000
+        }
+      ]
+    },
+    "security": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "CORS Headers",
+          "passed": "*"
+        },
+        {
+          "name": "SQL Injection Protection",
+          "passed": true
+        },
+        {
+          "name": "XSS Prevention",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "Implement caching or optimize database queries"
+  ]
+}
