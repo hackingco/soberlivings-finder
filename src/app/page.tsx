@@ -230,44 +230,44 @@ function HomePageContent() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-geometric-navy/20 to-geometric-navy/80"></div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative z-10 container-wide py-20">
-        {/* Ultra-Modern Header */}
-        <div className="text-center mb-20">
-          <div className="inline-block">
+      {/* Hero Section - Mobile Optimized */}
+      <section className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        {/* Ultra-Modern Header - Mobile Responsive */}
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+          <div className="inline-block w-full max-w-4xl">
             <div className="relative group">
-              {/* Geometric glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue via-geometric-cyan to-geometric-green rounded-[3rem] blur-3xl opacity-60 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-soft"></div>
+              {/* Geometric glow effect - Scaled for mobile */}
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue via-geometric-cyan to-geometric-green rounded-2xl sm:rounded-[3rem] blur-2xl sm:blur-3xl opacity-40 sm:opacity-60 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-soft"></div>
               
-              {/* Main header container */}
-              <div className="relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-3xl rounded-[3rem] p-12 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:border-white/30">
-                <div className="flex items-center gap-10">
-                  {/* Logo */}
-                  <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-br from-geometric-blue to-geometric-cyan rounded-full blur-2xl opacity-80"></div>
-                    <div className="relative bg-gradient-to-br from-geometric-blue via-geometric-cyan to-geometric-emerald rounded-full p-8 shadow-2xl animate-morph">
-                      <Search className="h-20 w-20 text-white drop-shadow-lg" />
-                      <div className="absolute -inset-4 border-2 border-geometric-cyan/30 rounded-full animate-pulse"></div>
-                      <div className="absolute -inset-8 border border-geometric-green/20 rounded-full animate-pulse animation-delay-2000"></div>
+              {/* Main header container - Mobile optimized padding and layout */}
+              <div className="relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-2xl sm:backdrop-blur-3xl rounded-2xl sm:rounded-[3rem] p-6 sm:p-8 lg:p-12 border border-white/20 shadow-xl sm:shadow-2xl hover:shadow-3xl transition-all duration-500 hover:border-white/30">
+                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 lg:gap-10">
+                  {/* Logo - Responsive sizing */}
+                  <div className="relative group-hover:scale-105 sm:group-hover:scale-110 transition-transform duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-geometric-blue to-geometric-cyan rounded-full blur-xl sm:blur-2xl opacity-70 sm:opacity-80"></div>
+                    <div className="relative bg-gradient-to-br from-geometric-blue via-geometric-cyan to-geometric-emerald rounded-full p-4 sm:p-6 lg:p-8 shadow-xl sm:shadow-2xl animate-morph">
+                      <Search className="h-12 w-12 sm:h-16 sm:w-16 lg:h-20 lg:w-20 text-white drop-shadow-lg" />
+                      <div className="absolute -inset-2 sm:-inset-4 border-2 border-geometric-cyan/30 rounded-full animate-pulse"></div>
+                      <div className="hidden sm:block absolute -inset-8 border border-geometric-green/20 rounded-full animate-pulse animation-delay-2000"></div>
                     </div>
                   </div>
                   
-                  {/* Text */}
-                  <div className="text-left">
-                    <div className="flex items-center gap-4 mb-3">
-                      <Badge className="bg-gradient-to-r from-geometric-blue to-geometric-cyan text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                  {/* Text - Mobile centered, desktop left-aligned */}
+                  <div className="text-center sm:text-left">
+                    <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-3 lg:gap-4 mb-3">
+                      <Badge className="bg-gradient-to-r from-geometric-blue to-geometric-cyan text-white px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider">
                         AI Powered
                       </Badge>
-                      <Badge className="bg-gradient-to-r from-geometric-emerald to-geometric-green text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                      <Badge className="bg-gradient-to-r from-geometric-emerald to-geometric-green text-white px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wide sm:tracking-wider">
                         Verified Data
                       </Badge>
                     </div>
-                    <h1 className="text-6xl lg:text-8xl font-black tracking-tighter leading-none">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-none">
                       <span className="text-gradient-geometric">
                         SoberLiving
                       </span>
                     </h1>
-                    <p className="text-3xl font-bold bg-gradient-to-r from-geometric-cyan to-geometric-green bg-clip-text text-transparent tracking-[0.2em] mt-2">
+                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-geometric-cyan to-geometric-green bg-clip-text text-transparent tracking-[0.15em] sm:tracking-[0.2em] mt-2">
                       FINDER
                     </p>
                   </div>
@@ -276,47 +276,47 @@ function HomePageContent() {
             </div>
           </div>
 
-          <h2 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-6 sm:mb-8 leading-tight px-4">
             Find Quality
             <span className="block bg-gradient-to-r from-geometric-cyan via-geometric-blue to-geometric-green bg-clip-text text-transparent animate-gradient">
               Treatment Centers
             </span>
           </h2>
           
-          <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto mb-12 leading-relaxed font-medium">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed font-medium px-4">
             Search thousands of verified residential treatment facilities, sober living homes, 
             and recovery programs with AI-enhanced data and real-time availability.
           </p>
           
-          {/* Premium Trust Indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-geometric-emerald to-geometric-green rounded-lg rotate-3 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-emerald/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-emerald/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
-                <div className="p-2 bg-geometric-emerald/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="h-5 w-5 text-green-300 drop-shadow-glow" />
+          {/* Premium Trust Indicators - Mobile Optimized */}
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 sm:mt-12 px-4">
+            <div className="group relative w-full sm:w-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-emerald to-geometric-green rounded-lg rotate-1 sm:rotate-3 blur-lg sm:blur-xl opacity-40 sm:opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-geometric-emerald/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-emerald/30 shadow-lg sm:shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
+                <div className="p-1.5 sm:p-2 bg-geometric-emerald/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-green-300 drop-shadow-glow" />
                 </div>
-                <span className="font-bold text-white">Verified Facilities</span>
+                <span className="font-semibold sm:font-bold text-sm sm:text-base text-white">Verified Facilities</span>
               </div>
             </div>
             
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-lg -rotate-3 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-cyan/20 to-geometric-blue/20 backdrop-blur-xl rounded-lg border border-geometric-cyan/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
-                <div className="p-2 bg-geometric-cyan/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
-                  <Sparkles className="h-5 w-5 text-cyan-300 drop-shadow-glow" />
+            <div className="group relative w-full sm:w-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-cyan to-geometric-blue rounded-lg -rotate-1 sm:-rotate-3 blur-lg sm:blur-xl opacity-40 sm:opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-geometric-cyan/20 to-geometric-blue/20 backdrop-blur-xl rounded-lg border border-geometric-cyan/30 shadow-lg sm:shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
+                <div className="p-1.5 sm:p-2 bg-geometric-cyan/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-300 drop-shadow-glow" />
                 </div>
-                <span className="font-bold text-white">AI Enhanced</span>
+                <span className="font-semibold sm:font-bold text-sm sm:text-base text-white">AI Enhanced</span>
               </div>
             </div>
             
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-lg rotate-2 blur-xl opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
-              <div className="relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-geometric-blue/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-blue/30 shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
-                <div className="p-2 bg-geometric-blue/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
-                  <MapPin className="h-5 w-5 text-blue-300 drop-shadow-glow" />
+            <div className="group relative w-full sm:w-auto">
+              <div className="absolute inset-0 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-lg rotate-1 sm:rotate-2 blur-lg sm:blur-xl opacity-40 sm:opacity-60 group-hover:opacity-80 transition-all duration-300"></div>
+              <div className="relative flex items-center justify-center sm:justify-start gap-2 sm:gap-3 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-geometric-blue/20 to-geometric-green/20 backdrop-blur-xl rounded-lg border border-geometric-blue/30 shadow-lg sm:shadow-xl hover:shadow-2xl transition-all duration-300 hover:rotate-0">
+                <div className="p-1.5 sm:p-2 bg-geometric-blue/30 backdrop-blur-sm rounded-lg group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 drop-shadow-glow" />
                 </div>
-                <span className="font-bold text-white">Nationwide</span>
+                <span className="font-semibold sm:font-bold text-sm sm:text-base text-white">Nationwide</span>
               </div>
             </div>
           </div>
