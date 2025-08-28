@@ -9,6 +9,13 @@ export async function POST(
   try {
     const { id } = await params
     
+    // Check if supabase is configured
+    if (!supabase) {
+      return NextResponse.json({ 
+        error: 'Database not configured. Please set up Supabase credentials.' 
+      }, { status: 500 })
+    }
+    
     // Get facility from database
     const { data: facility, error: fetchError } = await supabase
       .from('facilities')

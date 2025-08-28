@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { mockFacilities } from '@/lib/mock-data'
+
+// Fallback to mock data when Supabase is not configured
+const USE_MOCK_DATA = !process.env.NEXT_PUBLIC_SUPABASE_URL
 
 // Interface for search filters (used for documentation)
 // interface SearchFilters {
@@ -18,80 +21,85 @@ export async function GET(request: NextRequest) {
     const services = searchParams.get('services')?.split(',').filter(Boolean) || []
     const insurance = searchParams.get('insurance')?.split(',').filter(Boolean) || []
     
-    // Build the base query
-    let supabaseQuery = supabase
-      .from('facilities')
-      .select('*')
-      .order('name')
-    
-    // Apply text search filter
-    if (query) {
-      supabaseQuery = supabaseQuery.or(
-        `name.ilike.%${query}%,city.ilike.%${query}%,residentialServices.ilike.%${query}%,allServices.ilike.%${query}%`
-      )
-    }
-    
-    // Apply location filter (basic city/state matching for now)
-    if (location) {
-      const locationParts = location.split(',').map(part => part.trim())
-      if (locationParts.length >= 2) {
-        const city = locationParts[0]
-        const state = locationParts[1]
-        supabaseQuery = supabaseQuery
-          .ilike('city', `%${city}%`)
-          .ilike('state', `%${state}%`)
-      } else {
-        // Single location term - search both city and state
-        supabaseQuery = supabaseQuery.or(
-          `city.ilike.%${location}%,state.ilike.%${location}%`
+    // Use mock data when Supabase is not configured
+    if (USE_MOCK_DATA) {
+      console.log('Using mock data for search')
+      
+      let filteredFacilities = [...mockFacilities]
+      
+      // Apply text search filter
+      if (query) {
+        filteredFacilities = filteredFacilities.filter(facility =>
+          facility.name.toLowerCase().includes(query.toLowerCase()) ||
+          facility.city.toLowerCase().includes(query.toLowerCase()) ||
+          facility.residentialServices?.toLowerCase().includes(query.toLowerCase()) ||
+          facility.allServices?.toLowerCase().includes(query.toLowerCase())
         )
       }
-    }
-    
-    // Apply service filters
-    if (services.length > 0) {
-      const serviceFilter = services.map(service => 
-        `residentialServices.ilike.%${service}%,allServices.ilike.%${service}%`
-      ).join(',')
-      supabaseQuery = supabaseQuery.or(serviceFilter)
-    }
-    
-    // Apply insurance filters
-    if (insurance.length > 0) {
-      const insuranceFilter = insurance.map(ins => 
-        `acceptedInsurance.cs.{${ins}}`
-      ).join(',')
-      supabaseQuery = supabaseQuery.or(insuranceFilter)
-    }
-    
-    // Limit results
-    supabaseQuery = supabaseQuery.limit(50)
-    
-    const { data: facilities, error } = await supabaseQuery
-    
-    if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json({ error: 'Database query failed' }, { status: 500 })
-    }
-    
-    // Calculate distances if coordinates are available
-    // This is a simplified version - in production you'd use PostGIS or similar
-    const enrichedFacilities = facilities?.map(facility => ({
-      ...facility,
-      distance: Math.random() * 50 // Placeholder distance calculation
-    }))
-    
-    return NextResponse.json({
-      facilities: enrichedFacilities || [],
-      count: enrichedFacilities?.length || 0,
-      query: {
-        text: query,
-        location,
-        radius,
-        services,
-        insurance
+      
+      // Apply location filter
+      if (location) {
+        const locationParts = location.split(',').map(part => part.trim())
+        if (locationParts.length >= 2) {
+          const city = locationParts[0].toLowerCase()
+          const state = locationParts[1].toLowerCase()
+          filteredFacilities = filteredFacilities.filter(facility =>
+            facility.city.toLowerCase().includes(city) &&
+            facility.state.toLowerCase().includes(state)
+          )
+        } else {
+          filteredFacilities = filteredFacilities.filter(facility =>
+            facility.city.toLowerCase().includes(location.toLowerCase()) ||
+            facility.state.toLowerCase().includes(location.toLowerCase())
+          )
+        }
       }
-    })
+      
+      // Apply service filters
+      if (services.length > 0) {
+        filteredFacilities = filteredFacilities.filter(facility =>
+          services.some(service =>
+            facility.residentialServices?.toLowerCase().includes(service.toLowerCase()) ||
+            facility.allServices?.toLowerCase().includes(service.toLowerCase())
+          )
+        )
+      }
+      
+      // Apply insurance filters
+      if (insurance.length > 0) {
+        filteredFacilities = filteredFacilities.filter(facility =>
+          insurance.some(ins =>
+            facility.acceptedInsurance?.some(acceptedIns =>
+              acceptedIns.toLowerCase().includes(ins.toLowerCase())
+            )
+          )
+        )
+      }
+      
+      // Sort by distance and limit results
+      const sortedFacilities = filteredFacilities
+        .sort((a, b) => (a.distance || 0) - (b.distance || 0))
+        .slice(0, 50)
+      
+      return NextResponse.json({
+        facilities: sortedFacilities,
+        count: sortedFacilities.length,
+        query: {
+          text: query,
+          location,
+          radius,
+          services,
+          insurance
+        },
+        mock: true
+      })
+    }
+    
+    // Original Supabase code would go here when configured
+    // For now, just return an error to encourage proper setup
+    return NextResponse.json({ 
+      error: 'Database not configured. Please set up Supabase credentials.' 
+    }, { status: 500 })
     
   } catch (error) {
     console.error('Search API error:', error)

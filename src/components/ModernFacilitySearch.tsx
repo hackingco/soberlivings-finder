@@ -101,7 +101,7 @@ export default function ModernFacilitySearch({
   return (
     <div className={cn("w-full space-y-4", className)}>
       {/* Main search card */}
-      <Card className="bg-white shadow-medium border-0 overflow-hidden">
+      <Card className="bg-white/90 backdrop-blur-sm shadow-medium border-0 overflow-hidden hover-lift card-glow-primary">
         <CardContent className="p-6">
           {/* Primary search bar */}
           <div className="flex flex-col lg:flex-row gap-4 mb-4">
@@ -130,7 +130,7 @@ export default function ModernFacilitySearch({
             <Button 
               onClick={handleSearch} 
               disabled={loading}
-              className="h-12 px-8 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+              className="h-12 px-8 btn-gradient text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
             >
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -201,7 +201,7 @@ export default function ModernFacilitySearch({
 
       {/* Advanced filters */}
       {showFilters && (
-        <Card className="bg-white shadow-medium border-0 animate-in">
+        <Card className="bg-white/90 backdrop-blur-sm shadow-medium border-0 animate-fade-in-up card-glow-primary">
           <CardContent className="p-6">
             <div className="space-y-6">
               {/* Search radius */}

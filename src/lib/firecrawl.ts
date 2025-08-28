@@ -1,10 +1,14 @@
 import FirecrawlApp from '@mendable/firecrawl-js';
 
-if (!process.env.FIRECRAWL_API_KEY) {
-  throw new Error('FIRECRAWL_API_KEY is not set');
+const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
+
+if (!firecrawlApiKey) {
+  console.warn('FIRECRAWL_API_KEY is not set - web scraping will not work');
 }
 
-export const firecrawl = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
+export const firecrawl = firecrawlApiKey 
+  ? new FirecrawlApp({ apiKey: firecrawlApiKey })
+  : null;
 
 export interface ScrapedFacilityData {
   title?: string;
@@ -20,6 +24,11 @@ export interface ScrapedFacilityData {
 
 export async function scrapeFacilityWebsite(url: string): Promise<ScrapedFacilityData> {
   try {
+    if (!firecrawl) {
+      console.warn('Firecrawl not configured - skipping scraping');
+      return {};
+    }
+    
     const result = await firecrawl.scrapeUrl(url, {
       formats: ['markdown', 'extract'],
       extract: {

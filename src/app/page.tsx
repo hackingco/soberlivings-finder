@@ -126,13 +126,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 bg-mesh-pattern opacity-50"></div>
+      <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-float-gentle"></div>
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-green-600/20 rounded-full blur-3xl animate-float-gentle" style={{animationDelay: '2s'}}></div>
       {/* Modern Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-white/20 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-white/20 sticky top-0 z-50 relative">
         <div className="container-wide py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-br from-primary to-blue-600 rounded-2xl p-3 shadow-lg">
+              <div className="bg-gradient-to-br from-primary to-blue-600 rounded-2xl p-3 shadow-lg hover-glow transition-all duration-300 cursor-pointer">
                 <Search className="h-8 w-8 text-white" />
               </div>
               <div>
@@ -148,7 +152,7 @@ export default function HomePage() {
                 onClick={handleImportData}
                 disabled={importing}
                 variant="outline"
-                className="flex items-center gap-2 border-primary/20 text-primary hover:bg-primary/5"
+                className="flex items-center gap-2 border-primary/20 text-primary hover:bg-primary/5 hover-lift transition-all duration-300 backdrop-blur-sm"
               >
                 <Database className="h-4 w-4" />
                 {importing ? 'Importing...' : 'Import Latest Data'}
@@ -160,11 +164,13 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container-wide py-16">
-        <div className="text-center mb-12 space-y-6">
-          <h2 className="text-5xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
-            Find Quality
-            <span className="block text-gradient">Treatment Centers</span>
-          </h2>
+        <div className="text-center mb-12 space-y-6 relative z-10">
+          <div className="animate-fade-in-up">
+            <h2 className="text-5xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
+              Find Quality
+              <span className="block text-gradient animate-shimmer bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_100%]">Treatment Centers</span>
+            </h2>
+          </div>
           <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
             Search thousands of verified residential treatment facilities, sober living homes, 
             and recovery programs. Get detailed information, reviews, and contact details.
@@ -188,13 +194,15 @@ export default function HomePage() {
         </div>
 
         {/* Search Section */}
-        <div className="max-w-6xl mx-auto mb-16">
-          <ModernFacilitySearch onSearch={handleSearch} loading={loading} />
+        <div className="max-w-6xl mx-auto mb-16 relative z-10">
+          <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+            <ModernFacilitySearch onSearch={handleSearch} loading={loading} />
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 relative z-10">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700">Total Facilities</CardTitle>
               <Database className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
@@ -210,10 +218,10 @@ export default function HomePage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in" style={{animationDelay: '0.1s'}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700">AI Enhanced</CardTitle>
-              <Sparkles className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform" />
+              <Sparkles className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform animate-pulse-slow" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
@@ -224,7 +232,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
           
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in" style={{animationDelay: '0.2s'}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-semibold text-gray-700">Successful Matches</CardTitle>
               <Heart className="h-5 w-5 text-red-500 group-hover:scale-110 transition-transform" />
@@ -244,7 +252,7 @@ export default function HomePage() {
 
       {/* Results Section */}
       {searchPerformed && (
-        <section className="container-wide pb-16">
+        <section className="container-wide pb-16 relative z-10">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-3xl font-display font-bold text-gray-900">
@@ -300,16 +308,16 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft">
+            <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover-lift">
               <CardContent className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-soft">
                   <Search className="h-8 w-8 text-gray-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No facilities found</h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   Try adjusting your search criteria or importing new data to find treatment facilities.
                 </p>
-                <Button onClick={handleImportData} disabled={importing} className="bg-primary hover:bg-primary/90">
+                <Button onClick={handleImportData} disabled={importing} className="btn-gradient text-white hover-lift">
                   <Database className="h-4 w-4 mr-2" />
                   Import Latest Data
                 </Button>
@@ -321,8 +329,8 @@ export default function HomePage() {
 
       {/* Getting Started Section */}
       {!searchPerformed && (
-        <section className="container-wide pb-16">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft">
+        <section className="container-wide pb-16 relative z-10">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover-lift card-glow-primary">
             <CardContent className="p-8">
               <h3 className="text-2xl font-display font-semibold mb-6 text-center text-gray-900">
                 Getting Started
@@ -384,10 +392,12 @@ export default function HomePage() {
               <div className="mt-8 text-center">
                 <Button 
                   onClick={() => handleSearch('', { location: 'San Francisco, CA', radius: 25, services: [], acceptsInsurance: [] })}
-                  className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="btn-gradient text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift relative overflow-hidden group"
                 >
-                  Try a Sample Search
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <span className="relative z-10">
+                    Try a Sample Search
+                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                  </span>
                 </Button>
               </div>
             </CardContent>
@@ -396,25 +406,35 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="container-wide py-12">
+      <footer className="bg-gradient-to-r from-gray-900 via-slate-900 to-gray-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-mesh-pattern opacity-10"></div>
+        <div className="container-wide py-12 relative z-10">
           <div className="text-center">
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="bg-primary rounded-xl p-2">
+              <div className="bg-gradient-to-br from-primary to-blue-600 rounded-xl p-2 shadow-lg">
                 <Search className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-2xl font-display font-bold">SoberLiving Finder</h3>
             </div>
-            <p className="text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Helping people find quality treatment facilities and sober living homes nationwide. 
               Your journey to recovery starts with finding the right support.
             </p>
             <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-400">
-              <span>Built with ❤️ for recovery</span>
+              <span className="flex items-center gap-1">
+                <Heart className="h-3 w-3 text-red-400" />
+                Built with ❤️ for recovery
+              </span>
               <span>•</span>
-              <span>Powered by AI</span>
+              <span className="flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-purple-400" />
+                Powered by AI
+              </span>
               <span>•</span>
-              <span>Available 24/7</span>
+              <span className="flex items-center gap-1">
+                <Shield className="h-3 w-3 text-green-400" />
+                Available 24/7
+              </span>
             </div>
           </div>
         </div>
