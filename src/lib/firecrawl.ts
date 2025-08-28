@@ -52,12 +52,12 @@ export async function scrapeFacilityWebsite(url: string): Promise<ScrapedFacilit
               items: { type: 'string' }
             }
           }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line
         } as any
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     return (result as any).extract || {};
   } catch (error) {
     console.error('Error scraping facility website:', error);

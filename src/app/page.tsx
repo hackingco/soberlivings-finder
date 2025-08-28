@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Search, 
   Database, 
@@ -11,14 +11,22 @@ import {
   TrendingUp,
   CheckCircle,
   ArrowRight,
-  Star
+  Star,
+  BarChart3,
+  Filter,
+  X,
+  Share2,
+  Save
 } from 'lucide-react'
 import ModernFacilitySearch from '@/components/ModernFacilitySearch'
 import ModernFacilityCard, { type Facility } from '@/components/ModernFacilityCard'
+import FacilityComparison from '@/components/FacilityComparison'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { LoadingSpinner, LoadingSkeleton } from '@/components/ui/loading'
+import { ToastProvider, useToast } from '@/components/ui/toast'
 
 interface SearchFilters {
   location: string
@@ -27,37 +35,92 @@ interface SearchFilters {
   acceptsInsurance: string[]
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const [facilities, setFacilities] = useState<Facility[]>([])
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [searchPerformed, setSearchPerformed] = useState(false)
+  const [comparisonList, setComparisonList] = useState<Facility[]>([])
+  const [showComparison, setShowComparison] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [savedSearches, setSavedSearches] = useState<Array<{ name: string; query: string; filters: SearchFilters }>>([])
   const [stats, setStats] = useState({
     totalFacilities: 0,
     totalSearches: 0,
     lastUpdate: null as string | null
   })
+  const [currentQuery, setCurrentQuery] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  
+  const { toast } = useToast()
 
-  // Load initial stats
+  // Load initial stats and initialize database
   useEffect(() => {
     loadStats()
-  }, [])
+    initializeDatabase()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const initializeDatabase = async () => {
+    try {
+      // Check database status
+      const statusResponse = await fetch('/api/init-db')
+      const statusData = await statusResponse.json()
+      
+      if (!statusData.schemaExists || statusData.facilitiesCount < 10) {
+        console.log('🔧 Initializing database...')
+        
+        // Initialize database schema and seed data
+        const initResponse = await fetch('/api/init-db', { method: 'POST' })
+        const initData = await initResponse.json()
+        
+        if (initData.success) {
+          console.log('✅ Database initialized successfully')
+          // Update stats to reflect new data
+          setTimeout(loadStats, 2000)
+        } else {
+          console.warn('⚠️ Database initialization had issues:', initData.message)
+        }
+      } else {
+        console.log('✅ Database already initialized')
+      }
+    } catch (error) {
+      console.error('Database initialization error:', error)
+      // Don't show error to user, app can still function
+    }
+  }
 
   const loadStats = async () => {
     try {
+      // Get real data from database
+      const response = await fetch('/api/seed-data')
+      const data = await response.json()
+      
       setStats({
-        totalFacilities: 1247, // Demo data
-        totalSearches: 5892,
+        totalFacilities: data.facilitiesCount || 0,
+        totalSearches: 5892, // Keep demo for searches
         lastUpdate: new Date().toISOString()
       })
     } catch (error) {
       console.error('Failed to load stats:', error)
+      // Fallback to demo data
+      setStats({
+        totalFacilities: 0,
+        totalSearches: 0,
+        lastUpdate: new Date().toISOString()
+      })
     }
   }
 
-  const handleSearch = async (query: string, filters: SearchFilters) => {
+  const handleSearch = useCallback(async (query: string, filters: SearchFilters) => {
     setLoading(true)
     setSearchPerformed(true)
+    setError(null)
+    setCurrentQuery(query)
+    
+    // Add to recent searches
+    if (query && !recentSearches.includes(query)) {
+      setRecentSearches(prev => [query, ...prev.slice(0, 4)])
+    }
     
     try {
       const searchParams = new URLSearchParams({
@@ -73,19 +136,36 @@ export default function HomePage() {
       
       if (response.ok) {
         setFacilities(data.facilities || [])
+        toast({
+          title: "Search completed",
+          description: `Found ${data.facilities?.length || 0} facilities`,
+          variant: "success"
+        })
       } else {
         console.error('Search failed:', data.error)
         setFacilities([])
+        setError(data.error || 'Search failed')
+        toast({
+          title: "Search failed", 
+          description: data.error || 'Please try again with different criteria',
+          variant: "error"
+        })
       }
     } catch (error) {
       console.error('Search error:', error)
       setFacilities([])
+      setError('Network error occurred')
+      toast({
+        title: "Network error",
+        description: "Please check your connection and try again",
+        variant: "error"
+      })
     } finally {
       setLoading(false)
     }
-  }
+  }, [recentSearches, toast])
 
-  const handleImportData = async () => {
+  const handleImportData = useCallback(async () => {
     setImporting(true)
     
     try {
@@ -98,24 +178,97 @@ export default function HomePage() {
       const data = await response.json()
       
       if (response.ok) {
-        alert(`Successfully imported ${data.imported} facilities!`)
+        toast({
+          title: "Import successful!",
+          description: `Successfully imported ${data.imported} facilities`,
+          variant: "success",
+          duration: 6000
+        })
         loadStats()
       } else {
-        alert(`Import failed: ${data.error}`)
+        toast({
+          title: "Import failed",
+          description: data.error || 'Please try again later',
+          variant: "error"
+        })
       }
     } catch (error) {
       console.error('Import error:', error)
-      alert('Import failed. Please try again.')
+      toast({
+        title: "Import failed",
+        description: 'Network error. Please try again.',
+        variant: "error"
+      })
     } finally {
       setImporting(false)
     }
-  }
+  }, [toast])
 
-  const handleViewDetails = (facility: Facility) => {
+  const handleSaveSearch = useCallback((name: string, filters: SearchFilters) => {
+    const newSavedSearch = { name, query: currentQuery, filters }
+    setSavedSearches(prev => [...prev, newSavedSearch])
+    toast({
+      title: "Search saved!",
+      description: `"${name}" has been saved to your searches`,
+      variant: "success"
+    })
+  }, [currentQuery, toast])
+  
+  const handleCompare = useCallback((facility: Facility) => {
+    setComparisonList(prev => {
+      const isAlreadyInComparison = prev.some(f => f.id === facility.id)
+      
+      if (isAlreadyInComparison) {
+        const updated = prev.filter(f => f.id !== facility.id)
+        toast({
+          title: "Removed from comparison",
+          description: `${facility.name} removed from comparison`,
+          variant: "info"
+        })
+        return updated
+      } else if (prev.length >= 3) {
+        toast({
+          title: "Comparison limit reached",
+          description: "You can compare up to 3 facilities at once",
+          variant: "warning"
+        })
+        return prev
+      } else {
+        toast({
+          title: "Added to comparison",
+          description: `${facility.name} added to comparison`,
+          variant: "success"
+        })
+        return [...prev, facility]
+      }
+    })
+  }, [toast])
+  
+  const handleShare = useCallback(async (facility: Facility) => {
+    try {
+      await navigator.clipboard.writeText(
+        `Check out ${facility.name} - ${facility.city}, ${facility.state}. Phone: ${facility.phone || 'Not available'}`
+      )
+      toast({
+        title: "Facility info copied!",
+        description: "Facility information copied to clipboard",
+        variant: "success"
+      })
+    } catch (error) {
+      console.error('Copy failed:', error)
+      toast({
+        title: "Copy failed",
+        description: "Unable to copy to clipboard",
+        variant: "error"
+      })
+    }
+  }, [toast])
+
+  const handleViewDetails = useCallback((facility: Facility) => {
     window.open(`/facility/${facility.id}`, '_blank')
-  }
+  }, [])
 
-  const handleGetDirections = (facility: Facility) => {
+  const handleGetDirections = useCallback((facility: Facility) => {
     if (facility.latitude && facility.longitude) {
       const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${facility.latitude},${facility.longitude}`
       window.open(mapsUrl, '_blank')
@@ -123,7 +276,7 @@ export default function HomePage() {
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facility.address + ', ' + facility.city + ', ' + facility.state)}`
       window.open(mapsUrl, '_blank')
     }
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
@@ -196,8 +349,60 @@ export default function HomePage() {
         {/* Search Section */}
         <div className="max-w-6xl mx-auto mb-16 relative z-10">
           <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-            <ModernFacilitySearch onSearch={handleSearch} loading={loading} />
+            <ModernFacilitySearch 
+              onSearch={handleSearch} 
+              loading={loading}
+              recentSearches={recentSearches}
+              onSaveSearch={handleSaveSearch}
+              savedSearches={savedSearches}
+            />
           </div>
+          
+          {/* Comparison bar */}
+          {comparisonList.length > 0 && (
+            <div className="mt-6 bg-white/90 backdrop-blur-sm rounded-lg border border-primary/20 p-4 shadow-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-gray-900">
+                    Comparing {comparisonList.length} facilities
+                  </span>
+                  <div className="flex gap-2">
+                    {comparisonList.map(facility => (
+                      <Badge key={facility.id} variant="outline" className="text-xs">
+                        {facility.name}
+                        <button
+                          onClick={() => handleCompare(facility)}
+                          className="ml-1 hover:text-red-500 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowComparison(true)}
+                    className="hover:border-primary hover:text-primary"
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Compare
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setComparisonList([])}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -304,6 +509,10 @@ export default function HomePage() {
                   facility={facility}
                   onViewDetails={handleViewDetails}
                   onGetDirections={handleGetDirections}
+                  onCompare={handleCompare}
+                  onShare={handleShare}
+                  isInComparison={comparisonList.some(f => f.id === facility.id)}
+                  showQuickActions={true}
                 />
               ))}
             </div>
@@ -317,14 +526,35 @@ export default function HomePage() {
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
                   Try adjusting your search criteria or importing new data to find treatment facilities.
                 </p>
-                <Button onClick={handleImportData} disabled={importing} className="btn-gradient text-white hover-lift">
-                  <Database className="h-4 w-4 mr-2" />
-                  Import Latest Data
+                <Button 
+                  onClick={handleImportData} 
+                  loading={importing}
+                  variant="gradient"
+                  className="text-white hover-lift"
+                  leftIcon={<Database className="h-4 w-4" />}
+                >
+                  {importing ? 'Importing...' : 'Import Latest Data'}
                 </Button>
               </CardContent>
             </Card>
           )}
         </section>
+      )}
+
+      {/* Comparison Modal */}
+      {showComparison && comparisonList.length > 0 && (
+        <FacilityComparison
+          facilities={comparisonList}
+          onClose={() => setShowComparison(false)}
+          onRemoveFacility={(facilityId) => {
+            setComparisonList(prev => prev.filter(f => f.id !== facilityId))
+            if (comparisonList.length <= 1) {
+              setShowComparison(false)
+            }
+          }}
+          onViewDetails={handleViewDetails}
+          onGetDirections={handleGetDirections}
+        />
       )}
 
       {/* Getting Started Section */}
@@ -392,12 +622,12 @@ export default function HomePage() {
               <div className="mt-8 text-center">
                 <Button 
                   onClick={() => handleSearch('', { location: 'San Francisco, CA', radius: 25, services: [], acceptsInsurance: [] })}
-                  className="btn-gradient text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift relative overflow-hidden group"
+                  variant="gradient"
+                  size="lg"
+                  className="text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift relative overflow-hidden group"
+                  rightIcon={<ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />}
                 >
-                  <span className="relative z-10">
-                    Try a Sample Search
-                    <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-                  </span>
+                  Try a Sample Search
                 </Button>
               </div>
             </CardContent>
@@ -440,5 +670,13 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <ToastProvider>
+      <HomePageContent />
+    </ToastProvider>
   )
 }

@@ -13,28 +13,37 @@ datasource db {
 model Facility {
   id          String   @id @default(cuid())
   name        String
+  street      String?
   city        String
   state       String
   zip         String?
   phone       String?
-  address     String?
   website     String?
   latitude    Float?
   longitude   Float?
   
-  // Core services
+  // Core services - structured data
   residentialServices String?
   allServices        String?
+  services           String[] @default([])
   
   // Additional scraped data
   description        String?
   capacity          Int?
-  amenities         String[]
-  acceptedInsurance String[]
-  programs          String[]
+  amenities         String[] @default([])
+  acceptedInsurance String[] @default([])
+  programs          String[] @default([])
   
-  // Metadata
+  // Enhanced metadata for ETL
+  metadata          Json?
+  sourceData        Json?
+  geoHash          String?
+  isResidential    Boolean  @default(false)
+  serviceCount     Int      @default(0)
+  
+  // Data quality and verification
   verified          Boolean  @default(false)
+  dataQuality      Float?   // Score 0-1
   lastUpdated       DateTime @default(now()) @updatedAt
   createdAt         DateTime @default(now())
   
@@ -46,6 +55,10 @@ model Facility {
   reviews           Review[]
   averageRating     Float?
   
+  @@index([state, city])
+  @@index([latitude, longitude])
+  @@index([services])
+  @@index([isResidential])
   @@map("facilities")
 }
 

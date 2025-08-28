@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, MapPin, X, Sliders, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Search, MapPin, X, Sliders, ChevronDown, Bookmark, History, Filter, SortDesc } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { LoadingSpinner } from '@/components/ui/loading'
 import { cn } from '@/lib/utils'
 
 interface SearchFilters {
@@ -19,26 +20,80 @@ interface ModernFacilitySearchProps {
   onSearch: (query: string, filters: SearchFilters) => void
   loading?: boolean
   className?: string
+  recentSearches?: string[]
+  onSaveSearch?: (query: string, filters: SearchFilters) => void
+  savedSearches?: Array<{ name: string; query: string; filters: SearchFilters }>
 }
 
 export default function ModernFacilitySearch({ 
   onSearch, 
   loading = false,
-  className 
+  className,
+  recentSearches = [],
+  onSaveSearch,
+  savedSearches = []
 }: ModernFacilitySearchProps) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [showRecentSearches, setShowRecentSearches] = useState(false)
+  const [showSavedSearches, setShowSavedSearches] = useState(false)
   const [filters, setFilters] = useState<SearchFilters>({
     location: '',
     radius: 25,
     services: [],
     acceptsInsurance: []
   })
+  
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const locationInputRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = () => {
-    onSearch(query, { ...filters, location })
+    const searchFilters = { ...filters, location }
+    onSearch(query, searchFilters)
+    setShowRecentSearches(false)
+    setShowSavedSearches(false)
   }
+  
+  const handleSaveSearch = () => {
+    if (onSaveSearch && (query || location)) {
+      const searchName = `${query || 'All facilities'} in ${location || 'Any location'}`
+      onSaveSearch(searchName, { ...filters, location })
+    }
+  }
+  
+  const handleUseSavedSearch = (savedSearch: { name: string; query: string; filters: SearchFilters }) => {
+    setQuery(savedSearch.query)
+    setLocation(savedSearch.filters.location)
+    setFilters(savedSearch.filters)
+    setShowSavedSearches(false)
+  }
+  
+  const handleUseRecentSearch = (recentQuery: string) => {
+    setQuery(recentQuery)
+    setShowRecentSearches(false)
+    if (searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }
+  
+  // Enhanced keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowRecentSearches(false)
+        setShowSavedSearches(false)
+        setShowFilters(false)
+      }
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const serviceOptions = [
     'Residential Treatment',
@@ -108,17 +163,53 @@ export default function ModernFacilitySearch({
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
-                placeholder="Search for treatment facilities, services, or programs..."
+                ref={searchInputRef}
+                placeholder="Search for treatment facilities, services, or programs... (Ctrl+K)"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-12 h-12 text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
+                onFocus={() => setShowRecentSearches(recentSearches.length > 0)}
+                onBlur={() => setTimeout(() => setShowRecentSearches(false), 200)}
+                className="pl-12 pr-10 h-12 text-base border-gray-200 focus:border-primary focus:ring-primary/20 bg-gray-50 focus:bg-white transition-all duration-200"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               />
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+              
+              {/* Recent searches dropdown */}
+              {showRecentSearches && recentSearches.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
+                  <div className="p-2 border-b border-gray-100">
+                    <p className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                      <History className="h-3 w-3" />
+                      Recent Searches
+                    </p>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto">
+                    {recentSearches.slice(0, 5).map((recent, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleUseRecentSearch(recent)}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      >
+                        <Search className="h-3 w-3 text-gray-400" />
+                        {recent}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="lg:w-64 relative">
               <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <Input
+                ref={locationInputRef}
                 placeholder="City, State or ZIP"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -127,39 +218,87 @@ export default function ModernFacilitySearch({
               />
             </div>
             
-            <Button 
-              onClick={handleSearch} 
-              disabled={loading}
-              className="h-12 px-8 btn-gradient text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Searching...
-                </div>
-              ) : (
-                <>
-                  <Search className="h-5 w-5 mr-2" />
-                  Search
-                </>
+            <div className="flex gap-2">
+              {onSaveSearch && (query || location) && (
+                <Button
+                  variant="outline"
+                  onClick={handleSaveSearch}
+                  className="h-12 px-4 border-gray-200 hover:border-primary hover:text-primary transition-all duration-200"
+                  title="Save this search"
+                >
+                  <Bookmark className="h-4 w-4" />
+                </Button>
               )}
-            </Button>
+              
+              <Button 
+                onClick={handleSearch} 
+                loading={loading}
+                variant="gradient"
+                className="h-12 px-8 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift"
+                leftIcon={!loading ? <Search className="h-5 w-5" /> : undefined}
+              >
+                {loading ? 'Searching...' : 'Search'}
+              </Button>
+            </div>
           </div>
 
-          {/* Quick location buttons */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-sm text-gray-600 font-medium mr-2">Quick locations:</span>
-            {quickLocations.map((loc) => (
-              <Button
-                key={loc}
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation(loc === 'Current Location' ? '' : loc)}
-                className="text-xs h-8 text-gray-600 hover:text-primary hover:border-primary transition-colors"
-              >
-                {loc}
-              </Button>
-            ))}
+          {/* Quick actions and saved searches */}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm text-gray-600 font-medium mr-2">Quick locations:</span>
+              {quickLocations.slice(0, 4).map((loc) => (
+                <Button
+                  key={loc}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLocation(loc === 'Current Location' ? '' : loc)}
+                  className="text-xs h-8 text-gray-600 hover:text-primary hover:border-primary transition-colors"
+                >
+                  {loc}
+                </Button>
+              ))}
+            </div>
+            
+            {savedSearches.length > 0 && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSavedSearches(!showSavedSearches)}
+                  className="text-sm text-gray-600 hover:text-primary flex items-center gap-1"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  Saved ({savedSearches.length})
+                  <ChevronDown className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    showSavedSearches && "rotate-180"
+                  )} />
+                </Button>
+                
+                {showSavedSearches && (
+                  <div className="absolute top-full right-0 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1 min-w-64">
+                    <div className="p-2 border-b border-gray-100">
+                      <p className="text-xs font-medium text-gray-500">Saved Searches</p>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {savedSearches.map((saved, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleUseSavedSearch(saved)}
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="font-medium text-gray-900 truncate">{saved.name}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {saved.filters.services.length > 0 && `${saved.filters.services.length} services`}
+                            {saved.filters.acceptsInsurance.length > 0 && ` • ${saved.filters.acceptsInsurance.length} insurance types`}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Filters toggle */}

@@ -12,7 +12,12 @@ import {
   Heart,
   Info,
   DollarSign,
-  Award
+  Award,
+  Plus,
+  Check,
+  Share2,
+  Clock,
+  Calendar
 } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -47,16 +52,27 @@ interface ModernFacilityCardProps {
   facility: Facility
   onViewDetails: (facility: Facility) => void
   onGetDirections: (facility: Facility) => void
+  onCompare?: (facility: Facility) => void
+  onShare?: (facility: Facility) => void
   className?: string
+  isComparing?: boolean
+  isInComparison?: boolean
+  showQuickActions?: boolean
 }
 
 export default function ModernFacilityCard({ 
   facility, 
   onViewDetails, 
   onGetDirections,
-  className 
+  onCompare,
+  onShare,
+  className,
+  isComparing = false,
+  isInComparison = false,
+  showQuickActions = true
 }: ModernFacilityCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const formatServices = (services?: string) => {
     if (!services) return []
@@ -75,11 +91,34 @@ export default function ModernFacilityCard({
     return 'secondary'
   }
 
+  const handleShare = async () => {
+    if (onShare) {
+      onShare(facility)
+    } else if (navigator.share) {
+      try {
+        await navigator.share({
+          title: facility.name,
+          text: `Check out ${facility.name} - a treatment facility in ${facility.city}, ${facility.state}`,
+          url: window.location.href
+        })
+      } catch (err) {
+        console.log('Error sharing:', err)
+      }
+    }
+  }
+  
   return (
-    <Card className={cn(
-      "group relative overflow-hidden bg-white shadow-soft hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-gray-100",
-      className
-    )}>
+    <Card 
+      className={cn(
+        "group relative overflow-hidden bg-white shadow-soft hover:shadow-large transition-all duration-300 hover:-translate-y-1 border border-gray-100",
+        isInComparison && "ring-2 ring-primary ring-opacity-50 bg-primary/5",
+        className
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      interactive
+      hover
+    >
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
@@ -255,6 +294,46 @@ export default function ModernFacilityCard({
           )}
         </div>
 
+        {/* Quick actions bar - appears on hover */}
+        {showQuickActions && isHovered && (
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 p-1 flex gap-1 transition-all duration-200 animate-fade-in-up">
+            {onShare && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleShare()
+                }}
+                className="h-8 w-8 text-gray-600 hover:text-blue-600"
+                title="Share facility"
+              >
+                <Share2 className="h-3 w-3" />
+              </Button>
+            )}
+            
+            {onCompare && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onCompare(facility)
+                }}
+                className={cn(
+                  "h-8 w-8 transition-colors",
+                  isInComparison 
+                    ? "text-primary bg-primary/10" 
+                    : "text-gray-600 hover:text-primary"
+                )}
+                title={isInComparison ? "Remove from comparison" : "Add to comparison"}
+              >
+                {isInComparison ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+              </Button>
+            )}
+          </div>
+        )}
+        
         {/* Action buttons */}
         <div className="flex gap-2 pt-4">
           <Button 
@@ -264,9 +343,9 @@ export default function ModernFacilityCard({
               e.stopPropagation()
               onViewDetails(facility)
             }}
-            className="flex-1 group/btn"
+            className="flex-1 group/btn hover:border-primary hover:text-primary transition-all duration-200"
+            leftIcon={<Info className="h-4 w-4" />}
           >
-            <Info className="h-4 w-4 mr-2 group-hover/btn:text-primary transition-colors" />
             View Details
           </Button>
           
@@ -277,9 +356,9 @@ export default function ModernFacilityCard({
               e.stopPropagation()
               onGetDirections(facility)
             }}
-            className="flex-1"
+            className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-200"
+            leftIcon={<MapPin className="h-4 w-4" />}
           >
-            <MapPin className="h-4 w-4 mr-2" />
             Directions
           </Button>
         </div>

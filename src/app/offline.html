@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - SoberLivings Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            background: #f7f7f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .status-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .offline-badge {
+            background: #ef4444;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .saved-facilities {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .saved-facilities h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .facility-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .facility-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .facility-address {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+        
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Don't worry, you can still access your saved facilities and recent searches.</p>
+        
+        <div class="status">
+            <div class="status-item">
+                <span class="status-label">Connection Status</span>
+                <span class="offline-badge">Offline</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Cached Data</span>
+                <span class="status-value" id="cached-count">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Last Sync</span>
+                <span class="status-value" id="last-sync">Never</span>
+            </div>
+        </div>
+        
+        <button class="button" onclick="tryReconnect()">Try to Reconnect</button>
+        <button class="button" onclick="showSavedFacilities()">View Saved Facilities</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Attempting to reconnect...</p>
+        </div>
+        
+        <div class="saved-facilities" id="saved-facilities" style="display: none;">
+            <h2>Saved Facilities</h2>
+            <div id="facilities-list"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Check for cached data
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                document.getElementById('cached-count').textContent = names.length + ' items';
+            });
+        }
+        
+        // Get last sync time from localStorage
+        const lastSync = localStorage.getItem('lastSync');
+        if (lastSync) {
+            const date = new Date(parseInt(lastSync));
+            document.getElementById('last-sync').textContent = date.toLocaleString();
+        }
+        
+        // Try to reconnect
+        function tryReconnect() {
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+            
+            fetch('/api/health', { method: 'HEAD' })
+                .then(() => {
+                    // Connection restored
+                    window.location.reload();
+                })
+                .catch(() => {
+                    // Still offline
+                    setTimeout(() => {
+                        loading.classList.remove('active');
+                        alert('Still offline. Please check your internet connection.');
+                    }, 2000);
+                });
+        }
+        
+        // Show saved facilities
+        async function showSavedFacilities() {
+            const container = document.getElementById('saved-facilities');
+            const list = document.getElementById('facilities-list');
+            
+            container.style.display = 'block';
+            
+            // Try to get from IndexedDB
+            if ('indexedDB' in window) {
+                const db = await openDB();
+                const tx = db.transaction('saved_facilities', 'readonly');
+                const facilities = await tx.objectStore('saved_facilities').getAll();
+                
+                if (facilities.length > 0) {
+                    list.innerHTML = facilities.map(f => `
+                        <div class="facility-card">
+                            <div class="facility-name">${f.name}</div>
+                            <div class="facility-address">${f.address.city}, ${f.address.state}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p style="color: #666;">No saved facilities yet.</p>';
+                }
+            }
+        }
+        
+        // Open IndexedDB
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('soberlivings', 1);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('saved_facilities')) {
+                        db.createObjectStore('saved_facilities', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+        
+        // Listen for online event
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

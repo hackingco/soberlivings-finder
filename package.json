@@ -12,7 +12,10 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:setup": "prisma generate && prisma db push",
-    "vercel-build": "prisma generate && next build"
+    "db:seed": "tsx src/scripts/seed-database.ts",
+    "seed": "tsx src/scripts/seed-database.ts",
+    "postbuild": "tsx src/scripts/post-deployment.ts",
+    "vercel-build": "prisma generate && next build && npm run postbuild"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
@@ -28,6 +31,8 @@
     "@types/leaflet": "^1.9.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.542.0",
@@ -37,7 +42,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-leaflet": "^5.0.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -48,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
+    "tsx": "^4.6.2",
     "typescript": "^5"
   }
 }

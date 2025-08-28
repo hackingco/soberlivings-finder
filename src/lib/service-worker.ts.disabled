@@ -1,0 +1,292 @@
+/**
+ * Service Worker for Progressive Web App functionality
+ * Implements offline support and advanced caching strategies
+ */
+
+declare const self: ServiceWorkerGlobalScope;
+
+const CACHE_VERSION = 'v1';
+const CACHE_NAME = `soberlivings-${CACHE_VERSION}`;
+const STATIC_CACHE_NAME = `soberlivings-static-${CACHE_VERSION}`;
+const API_CACHE_NAME = `soberlivings-api-${CACHE_VERSION}`;
+
+// Assets to cache immediately
+const STATIC_ASSETS = [
+  '/',
+  '/offline.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+];
+
+// API endpoints to cache
+const API_ENDPOINTS = [
+  '/api/facilities/search',
+  '/api/facilities/popular',
+];
+
+/**
+ * Install event - cache static assets
+ */
+self.addEventListener('install', (event: ExtendableEvent) => {
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(STATIC_CACHE_NAME);
+      await cache.addAll(STATIC_ASSETS);
+      
+      // Skip waiting to activate immediately
+      await self.skipWaiting();
+    })()
+  );
+});
+
+/**
+ * Activate event - clean up old caches
+ */
+self.addEventListener('activate', (event: ExtendableEvent) => {
+  event.waitUntil(
+    (async () => {
+      // Clean up old caches
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter(name => name.startsWith('soberlivings-') && name !== CACHE_NAME)
+          .map(name => caches.delete(name))
+      );
+
+      // Take control of all clients
+      await self.clients.claim();
+    })()
+  );
+});
+
+/**
+ * Fetch event - implement caching strategies
+ */
+self.addEventListener('fetch', (event: FetchEvent) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Handle API requests with network-first strategy
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(networkFirstStrategy(request));
+    return;
+  }
+
+  // Handle static assets with cache-first strategy
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(cacheFirstStrategy(request));
+    return;
+  }
+
+  // Handle navigation requests with network-first strategy
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstStrategy(request));
+    return;
+  }
+
+  // Default to network-first for everything else
+  event.respondWith(networkFirstStrategy(request));
+});
+
+/**
+ * Cache-first strategy for static assets
+ */
+async function cacheFirstStrategy(request: Request): Promise<Response> {
+  const cache = await caches.open(STATIC_CACHE_NAME);
+  const cached = await cache.match(request);
+  
+  if (cached) {
+    // Update cache in background
+    fetchAndCache(request, cache);
+    return cached;
+  }
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    // Return offline page for navigation requests
+    if (request.mode === 'navigate') {
+      const offlineResponse = await cache.match('/offline.html');
+      if (offlineResponse) return offlineResponse;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Network-first strategy for dynamic content
+ */
+async function networkFirstStrategy(request: Request): Promise<Response> {
+  const cache = await caches.open(API_CACHE_NAME);
+  
+  try {
+    const response = await fetch(request);
+    
+    if (response.ok) {
+      // Cache successful responses
+      cache.put(request, response.clone());
+    }
+    
+    return response;
+  } catch (error) {
+    // Try cache on network failure
+    const cached = await cache.match(request);
+    if (cached) {
+      return cached;
+    }
+
+    // Return offline page for navigation requests
+    if (request.mode === 'navigate') {
+      const staticCache = await caches.open(STATIC_CACHE_NAME);
+      const offlineResponse = await staticCache.match('/offline.html');
+      if (offlineResponse) return offlineResponse;
+    }
+
+    throw error;
+  }
+}
+
+/**
+ * Stale-while-revalidate strategy
+ */
+async function staleWhileRevalidateStrategy(request: Request): Promise<Response> {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+
+  const fetchPromise = fetch(request).then(response => {
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  });
+
+  return cached || fetchPromise;
+}
+
+/**
+ * Background fetch and cache update
+ */
+async function fetchAndCache(request: Request, cache: Cache): Promise<void> {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      await cache.put(request, response);
+    }
+  } catch (error) {
+    // Silently fail - we already returned cached content
+  }
+}
+
+/**
+ * Check if pathname is a static asset
+ */
+function isStaticAsset(pathname: string): boolean {
+  const staticExtensions = [
+    '.js', '.css', '.png', '.jpg', '.jpeg', 
+    '.svg', '.gif', '.webp', '.woff', '.woff2', 
+    '.ttf', '.eot', '.ico'
+  ];
+  
+  return staticExtensions.some(ext => pathname.endsWith(ext));
+}
+
+/**
+ * Message handler for cache control
+ */
+self.addEventListener('message', (event: ExtendableMessageEvent) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  if (event.data?.type === 'CACHE_URLS') {
+    const { urls } = event.data;
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(cache => cache.addAll(urls))
+    );
+  }
+
+  if (event.data?.type === 'DELETE_CACHE') {
+    event.waitUntil(
+      caches.keys().then(names => 
+        Promise.all(names.map(name => caches.delete(name)))
+      )
+    );
+  }
+});
+
+/**
+ * Background sync for offline actions
+ */
+self.addEventListener('sync', (event: any) => {
+  if (event.tag === 'sync-facilities') {
+    event.waitUntil(syncFacilities());
+  }
+});
+
+/**
+ * Sync facilities data when connection is restored
+ */
+async function syncFacilities(): Promise<void> {
+  try {
+    // Get pending searches from IndexedDB
+    const db = await openDB();
+    const tx = db.transaction('pending_searches', 'readonly');
+    const searches = await tx.objectStore('pending_searches').getAll();
+
+    // Process each pending search
+    for (const search of searches) {
+      await fetch('/api/facilities/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(search)
+      });
+    }
+
+    // Clear pending searches
+    const clearTx = db.transaction('pending_searches', 'readwrite');
+    await clearTx.objectStore('pending_searches').clear();
+  } catch (error) {
+    console.error('Sync failed:', error);
+  }
+}
+
+/**
+ * Open IndexedDB for offline storage
+ */
+async function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('soberlivings', 1);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      
+      if (!db.objectStoreNames.contains('pending_searches')) {
+        db.createObjectStore('pending_searches', { 
+          keyPath: 'id', 
+          autoIncrement: true 
+        });
+      }
+      
+      if (!db.objectStoreNames.contains('saved_facilities')) {
+        db.createObjectStore('saved_facilities', { 
+          keyPath: 'id' 
+        });
+      }
+    };
+  });
+}
+
+export {};
