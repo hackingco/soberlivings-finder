@@ -219,14 +219,15 @@ function HomePageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 relative overflow-x-hidden">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-ocean-900 via-ocean-800 to-geometric-navy relative overflow-x-hidden bg-circuit-pattern">
+      {/* Geometric Animated Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-40 -right-20 w-96 h-96 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-20 left-40 w-96 h-96 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-transparent via-indigo-950/50 to-slate-950 opacity-60"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-slate-950/80"></div>
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-gradient-to-br from-geometric-blue to-geometric-cyan rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 -right-20 w-96 h-96 rotate-45 bg-gradient-to-br from-geometric-emerald to-geometric-green rounded-lg mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-40 w-96 h-96 bg-gradient-to-br from-geometric-cyan to-geometric-blue rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 bg-geometric-pattern opacity-5"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-transparent via-ocean-800/50 to-geometric-navy opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-geometric-navy/20 to-geometric-navy/80"></div>
       </div>
 
       {/* Hero Section */}
