@@ -366,7 +366,7 @@ export class SupabaseService {
       const result = await this.executeWithRetry(async () => {
         return await this.client!
           .from('facilities')
-          .upsert(batch, {
+          .upsert(batch as any, {
             onConflict: 'id',
             ignoreDuplicates: false
           })
