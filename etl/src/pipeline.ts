@@ -13,6 +13,7 @@ import { DataValidator } from './utils/validator';
 import { MetricsCollector } from './utils/metrics';
 import { RateLimiter } from './utils/rateLimiter';
 import { mockFacilities, getMockApiResponse } from './mockData';
+import { fetchPublicFacilities, transformPublicApiResponse } from './publicApi';
 import { 
   FacilityRecord, 
   TransformedFacility, 
