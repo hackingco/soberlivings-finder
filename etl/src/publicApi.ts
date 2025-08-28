@@ -18,28 +18,29 @@ export async function fetchPublicFacilities(options: {
   zip?: string;
   limit?: number;
 }) {
-  const baseUrl = 'https://findtreatment.gov/locator/exportsAsJson';
+  // Try different API endpoints
+  const endpoints = [
+    {
+      url: 'https://findtreatment.gov/locator/exportsAsJson',
+      params: {
+        sType: 'SA',
+        sAddr: options.zip || `${options.city || 'San Francisco'}, ${options.state || 'CA'}`,
+        pageNum: 1,
+        limitType: 0
+      }
+    },
+    {
+      url: 'https://findtreatment.samhsa.gov/locator/exportsAsJson',
+      params: {
+        sType: 'SA',
+        sAddr: options.state || 'CA',
+        pageNum: 1
+      }
+    }
+  ];
   
-  // Build query parameters
-  const params: any = {
-    sType: 'SA', // Substance Abuse
-    limitType: options.limit ? '1' : '0',
-  };
-  
-  // Add location parameter
-  if (options.zip) {
-    params.sAddr = options.zip;
-  } else if (options.city && options.state) {
-    params.sAddr = `${options.city}, ${options.state}`;
-  } else if (options.state) {
-    params.sAddr = options.state;
-  } else {
-    params.sAddr = 'California'; // Default to California
-  }
-  
-  if (options.limit) {
-    params.pageSize = options.limit;
-  }
+  // Try each endpoint
+  for (const endpoint of endpoints) {
   
   try {
     logger.info(`Fetching facilities from public API with params:`, params);
