@@ -133,6 +133,24 @@ export class ETLPipeline {
    */
   private async extract(options: any): Promise<FacilityRecord[]> {
     const records: FacilityRecord[] = [];
+    
+    // Check if API key is configured
+    const hasApiKey = this.config.apiKey && this.config.apiKey !== '';
+    
+    if (!hasApiKey) {
+      this.logger.warn('No API key configured, using mock data for testing');
+      
+      // Use mock data
+      const mockResponse = getMockApiResponse(1, options.limit || 10);
+      records.push(...mockResponse.data);
+      
+      this.metrics.increment('records.extracted', mockResponse.data.length);
+      this.logger.info(`Extracted ${mockResponse.data.length} mock records`);
+      
+      return records;
+    }
+    
+    // Real API extraction
     let page = 1;
     let hasMore = true;
 
