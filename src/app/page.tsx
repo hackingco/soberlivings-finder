@@ -382,7 +382,7 @@ function HomePageContent() {
                 <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
                   94%
                 </div>
-                <p className="text-purple-200 font-semibold text-lg">Success Rate</p>
+                <p className="text-blue-200 font-semibold text-sm sm:text-base lg:text-lg">Success Rate</p>
               </div>
             </div>
             <div className="h-1 bg-gradient-to-r from-geometric-blue to-geometric-green rounded-full"></div>
