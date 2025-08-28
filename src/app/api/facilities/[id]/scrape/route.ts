@@ -27,7 +27,7 @@ export async function POST(
       return NextResponse.json({ error: 'Facility not found' }, { status: 404 })
     }
     
-    if (!facility.website) {
+    if (!facility?.website) {
       return NextResponse.json({ error: 'No website available for this facility' }, { status: 400 })
     }
     
