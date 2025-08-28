@@ -15,7 +15,7 @@
     "db:seed": "tsx src/scripts/seed-database.ts",
     "seed": "tsx src/scripts/seed-database.ts",
     "postbuild": "tsx src/scripts/post-deployment.ts",
-    "vercel-build": "next build"
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
