@@ -150,9 +150,5 @@
   ],
   
   "cleanUrls": true,
-  "trailingSlash": false,
-  
-  "outputFileTracingIncludes": {
-    "/api/**/*": ["./src/lib/**/*"]
-  }
+  "trailingSlash": false
 }
