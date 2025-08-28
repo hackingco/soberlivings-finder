@@ -16,7 +16,11 @@ import {
   Filter,
   X,
   Share2,
-  Save
+  Save,
+  Phone,
+  Globe,
+  Users,
+  Award
 } from 'lucide-react'
 import ModernFacilitySearch from '@/components/ModernFacilitySearch'
 import ModernFacilityCard, { type Facility } from '@/components/ModernFacilityCard'
@@ -165,190 +169,117 @@ function HomePageContent() {
     }
   }, [recentSearches, toast])
 
-  const handleImportData = useCallback(async () => {
-    setImporting(true)
-    
-    try {
-      const response = await fetch('/api/facilities/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ location: '37.7749,-122.4194' })
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        toast({
-          title: "Import successful!",
-          description: `Successfully imported ${data.imported} facilities`,
-          variant: "success",
-          duration: 6000
-        })
-        loadStats()
-      } else {
-        toast({
-          title: "Import failed",
-          description: data.error || 'Please try again later',
-          variant: "error"
-        })
-      }
-    } catch (error) {
-      console.error('Import error:', error)
-      toast({
-        title: "Import failed",
-        description: 'Network error. Please try again.',
-        variant: "error"
-      })
-    } finally {
-      setImporting(false)
-    }
-  }, [toast])
-
-  const handleSaveSearch = useCallback((name: string, filters: SearchFilters) => {
-    const newSavedSearch = { name, query: currentQuery, filters }
-    setSavedSearches(prev => [...prev, newSavedSearch])
+  const handleSaveSearch = (query: string, filters: SearchFilters) => {
+    const name = `Search in ${filters.location || 'All Areas'}`
+    setSavedSearches(prev => [
+      ...prev.filter(s => s.name !== name), // Remove existing with same name
+      { name, query, filters }
+    ])
     toast({
-      title: "Search saved!",
+      title: "Search saved",
       description: `"${name}" has been saved to your searches`,
       variant: "success"
     })
-  }, [currentQuery, toast])
-  
-  const handleCompare = useCallback((facility: Facility) => {
-    setComparisonList(prev => {
-      const isAlreadyInComparison = prev.some(f => f.id === facility.id)
-      
-      if (isAlreadyInComparison) {
-        const updated = prev.filter(f => f.id !== facility.id)
-        toast({
-          title: "Removed from comparison",
-          description: `${facility.name} removed from comparison`,
-          variant: "info"
-        })
-        return updated
-      } else if (prev.length >= 3) {
-        toast({
-          title: "Comparison limit reached",
-          description: "You can compare up to 3 facilities at once",
-          variant: "warning"
-        })
-        return prev
-      } else {
-        toast({
-          title: "Added to comparison",
-          description: `${facility.name} added to comparison`,
-          variant: "success"
-        })
-        return [...prev, facility]
-      }
-    })
-  }, [toast])
-  
-  const handleShare = useCallback(async (facility: Facility) => {
-    try {
-      await navigator.clipboard.writeText(
-        `Check out ${facility.name} - ${facility.city}, ${facility.state}. Phone: ${facility.phone || 'Not available'}`
-      )
+  }
+
+  const handleCompare = (facility: Facility) => {
+    if (comparisonList.find(f => f.id === facility.id)) {
+      setComparisonList(prev => prev.filter(f => f.id !== facility.id))
+    } else if (comparisonList.length < 3) {
+      setComparisonList(prev => [...prev, facility])
+    } else {
       toast({
-        title: "Facility info copied!",
-        description: "Facility information copied to clipboard",
-        variant: "success"
-      })
-    } catch (error) {
-      console.error('Copy failed:', error)
-      toast({
-        title: "Copy failed",
-        description: "Unable to copy to clipboard",
-        variant: "error"
+        title: "Comparison limit reached",
+        description: "You can compare up to 3 facilities at once",
+        variant: "warning"
       })
     }
-  }, [toast])
+  }
 
-  const handleViewDetails = useCallback((facility: Facility) => {
-    window.open(`/facility/${facility.id}`, '_blank')
-  }, [])
+  const handleViewDetails = (facility: Facility) => {
+    // Open facility details in a modal or new page
+    console.log('View details for:', facility.name)
+    toast({
+      title: "Feature coming soon",
+      description: "Detailed facility view is being developed",
+      variant: "info"
+    })
+  }
 
-  const handleGetDirections = useCallback((facility: Facility) => {
+  const handleGetDirections = (facility: Facility) => {
+    // Open directions in maps app
     if (facility.latitude && facility.longitude) {
       const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${facility.latitude},${facility.longitude}`
       window.open(mapsUrl, '_blank')
-    } else if (facility.address) {
-      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(facility.address + ', ' + facility.city + ', ' + facility.state)}`
+    } else if (facility.city && facility.state) {
+      const searchQuery = encodeURIComponent(`${facility.name} ${facility.city} ${facility.state}`)
+      const mapsUrl = `https://www.google.com/maps/search/${searchQuery}`
       window.open(mapsUrl, '_blank')
     }
-  }, [])
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Animated background elements */}
-      <div className="absolute inset-0 bg-mesh-pattern opacity-50"></div>
-      <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-float-gentle"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-green-600/20 rounded-full blur-3xl animate-float-gentle" style={{animationDelay: '2s'}}></div>
-      {/* Modern Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-white/20 sticky top-0 z-50 relative">
-        <div className="container-wide py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-br from-primary to-blue-600 rounded-2xl p-3 shadow-lg hover-glow transition-all duration-300 cursor-pointer">
-                <Search className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-display font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                  SoberLiving Finder
-                </h1>
-                <p className="text-gray-600 font-medium">Find residential treatment facilities nationwide</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Button
-                onClick={handleImportData}
-                disabled={importing}
-                variant="outline"
-                className="flex items-center gap-2 border-primary/20 text-primary hover:bg-primary/5 hover-lift transition-all duration-300 backdrop-blur-sm"
-              >
-                <Database className="h-4 w-4" />
-                {importing ? 'Importing...' : 'Import Latest Data'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 -left-4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-1/3 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
       {/* Hero Section */}
-      <section className="container-wide py-16">
-        <div className="text-center mb-12 space-y-6 relative z-10">
-          <div className="animate-fade-in-up">
-            <h2 className="text-5xl md:text-6xl font-display font-bold text-gray-900 leading-tight">
-              Find Quality
-              <span className="block text-gradient animate-shimmer bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_100%]">Treatment Centers</span>
-            </h2>
+      <section className="relative z-10 container-wide py-20">
+        {/* Modern header with glassmorphism */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-6 mb-8 p-8 bg-white/20 backdrop-blur-lg rounded-3xl border border-white/30 shadow-xl">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-60"></div>
+              <div className="relative bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl p-4 shadow-2xl">
+                <Search className="h-12 w-12 text-white" />
+              </div>
+            </div>
+            <div className="text-left">
+              <h1 className="text-6xl md:text-7xl font-black tracking-tight">
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  SoberLiving
+                </span>
+              </h1>
+              <p className="text-xl font-semibold text-gray-700 tracking-wider">Finder</p>
+            </div>
           </div>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Find Quality
+            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent animate-gradient">
+              Treatment Centers
+            </span>
+          </h2>
+          
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
             Search thousands of verified residential treatment facilities, sober living homes, 
-            and recovery programs. Get detailed information, reviews, and contact details.
+            and recovery programs with AI-enhanced data and real-time availability.
           </p>
           
-          {/* Trust indicators */}
-          <div className="flex items-center justify-center gap-8 mt-8">
-            <div className="flex items-center gap-2 text-gray-600">
-              <Shield className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Verified Facilities</span>
+          {/* Trust indicators with modern design */}
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
+              <Shield className="h-6 w-6 text-emerald-500" />
+              <span className="font-semibold text-gray-700">Verified Facilities</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              <span className="font-medium">AI Enhanced</span>
+            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
+              <Sparkles className="h-6 w-6 text-purple-500" />
+              <span className="font-semibold text-gray-700">AI Enhanced</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium">50 States</span>
+            <div className="flex items-center gap-3 px-6 py-3 bg-white/60 backdrop-blur-sm rounded-full border border-white/40 shadow-lg">
+              <MapPin className="h-6 w-6 text-blue-500" />
+              <span className="font-semibold text-gray-700">50 States</span>
             </div>
           </div>
         </div>
 
-        {/* Search Section */}
-        <div className="max-w-6xl mx-auto mb-16 relative z-10">
-          <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+        {/* Modern Search Section */}
+        <div className="max-w-5xl mx-auto mb-16">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/40">
             <ModernFacilitySearch 
               onSearch={handleSearch} 
               loading={loading}
@@ -357,187 +288,263 @@ function HomePageContent() {
               savedSearches={savedSearches}
             />
           </div>
-          
-          {/* Comparison bar */}
-          {comparisonList.length > 0 && (
-            <div className="mt-6 bg-white/90 backdrop-blur-sm rounded-lg border border-primary/20 p-4 shadow-md">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-gray-900">
-                    Comparing {comparisonList.length} facilities
-                  </span>
-                  <div className="flex gap-2">
-                    {comparisonList.map(facility => (
-                      <Badge key={facility.id} variant="outline" className="text-xs">
-                        {facility.name}
-                        <button
-                          onClick={() => handleCompare(facility)}
-                          className="ml-1 hover:text-red-500 transition-colors"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowComparison(true)}
-                    className="hover:border-primary hover:text-primary"
-                  >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Compare
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setComparisonList([])}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Clear
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 relative z-10">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in">
+        {/* Enhanced Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">Total Facilities</CardTitle>
-              <Database className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+              <CardTitle className="text-sm font-semibold text-gray-700">Treatment Facilities</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                <Database className="h-6 w-6 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">
+              <div className="text-4xl font-bold text-gray-900 mb-2">
                 {stats.totalFacilities.toLocaleString()}
               </div>
-              <p className="text-sm text-gray-600 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3 text-green-600" />
-                Verified treatment centers
-              </p>
+              <p className="text-sm text-gray-600">Verified nationwide</p>
             </CardContent>
           </Card>
-          
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in" style={{animationDelay: '0.1s'}}>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">AI Enhanced</CardTitle>
-              <Sparkles className="h-5 w-5 text-purple-600 group-hover:scale-110 transition-transform animate-pulse-slow" />
+              <CardTitle className="text-sm font-semibold text-gray-700">Successful Searches</CardTitle>
+              <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                <TrendingUp className="h-6 w-6 text-emerald-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">100%</div>
-              <p className="text-sm text-gray-600 flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-green-600" />
-                Facilities enriched with Firecrawl
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover:shadow-medium transition-all duration-300 group hover-lift card-glow-primary animate-scale-in" style={{animationDelay: '0.2s'}}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold text-gray-700">Successful Matches</CardTitle>
-              <Heart className="h-5 w-5 text-red-500 group-hover:scale-110 transition-transform" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">
+              <div className="text-4xl font-bold text-gray-900 mb-2">
                 {stats.totalSearches.toLocaleString()}
               </div>
-              <p className="text-sm text-gray-600 flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-600" />
-                People helped find treatment
-              </p>
+              <p className="text-sm text-gray-600">People helped</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700">Success Rate</CardTitle>
+              <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                <Award className="h-6 w-6 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-gray-900 mb-2">
+                94%
+              </div>
+              <p className="text-sm text-gray-600">Find quality care</p>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* Results Section */}
-      {searchPerformed && (
-        <section className="container-wide pb-16 relative z-10">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-3xl font-display font-bold text-gray-900">
-                Search Results
-              </h3>
-              {facilities.length > 0 && (
-                <p className="text-gray-600 mt-1">
-                  Found {facilities.length} treatment facilities
-                </p>
-              )}
-            </div>
-            
-            {facilities.length > 0 && (
-              <Badge variant="success" className="text-sm px-4 py-2">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                {facilities.length} facilities found
-              </Badge>
-            )}
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-6 w-20" />
-                      <Skeleton className="h-6 w-24" />
-                    </div>
-                    <div className="flex gap-2 pt-4">
-                      <Skeleton className="h-10 flex-1" />
-                      <Skeleton className="h-10 flex-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : facilities.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-              {facilities.map((facility) => (
-                <ModernFacilityCard
-                  key={facility.id}
-                  facility={facility}
-                  onViewDetails={handleViewDetails}
-                  onGetDirections={handleGetDirections}
-                  onCompare={handleCompare}
-                  onShare={handleShare}
-                  isInComparison={comparisonList.some(f => f.id === facility.id)}
-                  showQuickActions={true}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover-lift">
-              <CardContent className="text-center py-16">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-soft">
-                  <Search className="h-8 w-8 text-gray-400" />
+      {/* Comparison bar */}
+      {comparisonList.length > 0 && (
+        <div className="max-w-5xl mx-auto mb-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <span className="font-semibold text-gray-900">
+                  Comparing {comparisonList.length} facilities
+                </span>
+                <div className="flex gap-2">
+                  {comparisonList.map(facility => (
+                    <Badge key={facility.id} variant="outline" className="text-xs">
+                      {facility.name}
+                      <button
+                        onClick={() => handleCompare(facility)}
+                        className="ml-1 hover:text-red-500 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No facilities found</h3>
-                <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                  Try adjusting your search criteria or importing new data to find treatment facilities.
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowComparison(true)}
+                  className="hover:border-blue-500 hover:text-blue-600"
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Compare
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setComparisonList([])}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search Results */}
+      {searchPerformed && (
+        <section className="container-wide py-8">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <LoadingSkeleton key={i} />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="bg-red-50 rounded-lg p-8 max-w-md mx-auto">
+                <div className="text-red-600 mb-4">
+                  <X className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-semibold text-red-900 mb-2">Search Error</h3>
+                <p className="text-red-700">{error}</p>
+                <Button 
+                  onClick={() => setError(null)} 
+                  variant="outline" 
+                  className="mt-4 border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          ) : facilities.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-gray-50 rounded-lg p-8 max-w-md mx-auto">
+                <div className="text-gray-400 mb-4">
+                  <Search className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Results Found</h3>
+                <p className="text-gray-600 mb-4">
+                  {currentQuery ? `No facilities found for "${currentQuery}"` : 'No facilities found with the selected criteria'}
                 </p>
                 <Button 
-                  onClick={handleImportData} 
-                  loading={importing}
-                  variant="gradient"
-                  className="text-white hover-lift"
-                  leftIcon={<Database className="h-4 w-4" />}
+                  onClick={() => handleSearch('', { location: 'California', radius: 50, services: [], acceptsInsurance: [] })}
+                  variant="outline"
+                  className="border-gray-300 text-gray-600 hover:bg-gray-50"
                 >
-                  {importing ? 'Importing...' : 'Import Latest Data'}
+                  Try Broader Search
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    Search Results
+                  </h2>
+                  <p className="text-gray-600 mt-2">
+                    Found {facilities.length} facilities{currentQuery && ` for "${currentQuery}"`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {facilities.map((facility, index) => (
+                  <div 
+                    key={facility.id} 
+                    className="animate-in slide-in-from-bottom duration-500"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <ModernFacilityCard 
+                      facility={facility}
+                      onCompare={handleCompare}
+                      onViewDetails={handleViewDetails}
+                      onGetDirections={handleGetDirections}
+                      isInComparison={comparisonList.some(f => f.id === facility.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
           )}
+        </section>
+      )}
+
+      {/* Welcome section for new users */}
+      {!searchPerformed && (
+        <section className="container-wide py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-12 border border-blue-100">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                  Your Journey to Recovery Starts Here
+                </h3>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  We&apos;ve partnered with treatment centers nationwide to help you find the perfect fit 
+                  for your recovery journey. Every facility is verified and enhanced with detailed information.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div className="flex items-start gap-4">
+                  <div className="bg-blue-100 rounded-lg p-3 flex-shrink-0">
+                    <Shield className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">🔒 Verified Facilities</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      Every treatment center is thoroughly vetted and verified for quality and authenticity.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="bg-purple-100 rounded-lg p-3 flex-shrink-0">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">🤖 AI Enhancement</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      Each facility is automatically enhanced with detailed information using advanced AI.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="bg-green-100 rounded-lg p-3 flex-shrink-0">
+                    <MapPin className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">🗺️ Nationwide Coverage</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      Find quality treatment options in all 50 states with detailed location information.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="bg-indigo-100 rounded-lg p-3 flex-shrink-0">
+                    <Heart className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">💝 Personal Support</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      Get personalized recommendations and support throughout your search journey.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <Button 
+                  onClick={() => handleSearch('', { location: 'California', radius: 25, services: [], acceptsInsurance: [] })}
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  Start Your Search
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 
@@ -546,125 +553,43 @@ function HomePageContent() {
         <FacilityComparison
           facilities={comparisonList}
           onClose={() => setShowComparison(false)}
-          onRemoveFacility={(facilityId) => {
-            setComparisonList(prev => prev.filter(f => f.id !== facilityId))
-            if (comparisonList.length <= 1) {
-              setShowComparison(false)
-            }
+          onRemoveFacility={(facilityId: string) => {
+            const facility = comparisonList.find(f => f.id === facilityId)
+            if (facility) handleCompare(facility)
           }}
           onViewDetails={handleViewDetails}
           onGetDirections={handleGetDirections}
         />
       )}
 
-      {/* Getting Started Section */}
-      {!searchPerformed && (
-        <section className="container-wide pb-16 relative z-10">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-soft hover-lift card-glow-primary">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-display font-semibold mb-6 text-center text-gray-900">
-                Getting Started
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 rounded-lg p-3 flex-shrink-0">
-                      <Search className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">🔍 Search Facilities</h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        Use the search bar above to find treatment facilities by name, location, or services offered.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-green-100 rounded-lg p-3 flex-shrink-0">
-                      <Database className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">📊 Import Fresh Data</h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        Click &quot;Import Latest Data&quot; to fetch the most recent facility information.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-purple-100 rounded-lg p-3 flex-shrink-0">
-                      <Sparkles className="h-6 w-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">🤖 AI Enhancement</h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        Each facility is automatically enhanced with detailed information using advanced AI.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-blue-100 rounded-lg p-3 flex-shrink-0">
-                      <MapPin className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">🗺️ Interactive Results</h4>
-                      <p className="text-gray-600 leading-relaxed">
-                        View detailed facility cards with contact info, services, and get directions instantly.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-8 text-center">
-                <Button 
-                  onClick={() => handleSearch('', { location: 'San Francisco, CA', radius: 25, services: [], acceptsInsurance: [] })}
-                  variant="gradient"
-                  size="lg"
-                  className="text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover-lift relative overflow-hidden group"
-                  rightIcon={<ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />}
-                >
-                  Try a Sample Search
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
       {/* Footer */}
       <footer className="bg-gradient-to-r from-gray-900 via-slate-900 to-gray-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-mesh-pattern opacity-10"></div>
-        <div className="container-wide py-12 relative z-10">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+        <div className="container-wide py-16 relative z-10">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="bg-gradient-to-br from-primary to-blue-600 rounded-xl p-2 shadow-lg">
-                <Search className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-3 shadow-lg">
+                <Search className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-2xl font-display font-bold">SoberLiving Finder</h3>
+              <h3 className="text-3xl font-bold">SoberLiving Finder</h3>
             </div>
-            <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
               Helping people find quality treatment facilities and sober living homes nationwide. 
               Your journey to recovery starts with finding the right support.
             </p>
-            <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-400">
-              <span className="flex items-center gap-1">
-                <Heart className="h-3 w-3 text-red-400" />
-                Built with ❤️ for recovery
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Sparkles className="h-3 w-3 text-purple-400" />
-                Powered by AI
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Shield className="h-3 w-3 text-green-400" />
-                Available 24/7
-              </span>
+            <div className="flex items-center justify-center gap-8 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span>Thousands Helped</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>Verified Data</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4" />
+                <span>With Compassion</span>
+              </div>
             </div>
           </div>
         </div>
