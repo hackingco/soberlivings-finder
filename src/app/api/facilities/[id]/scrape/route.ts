@@ -21,7 +21,7 @@ export async function POST(
       .from('facilities')
       .select('*')
       .eq('id', id)
-      .single()
+      .single() as { data: any, error: any }
     
     if (fetchError || !facility) {
       return NextResponse.json({ error: 'Facility not found' }, { status: 404 })
