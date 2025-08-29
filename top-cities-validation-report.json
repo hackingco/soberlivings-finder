@@ -1,0 +1,538 @@
+{
+  "timestamp": "2025-08-29T20:27:07.237Z",
+  "environment": "Local Development",
+  "totalTests": 70,
+  "passed": 40,
+  "failed": 0,
+  "cityResults": [
+    {
+      "rank": 1,
+      "city": "Los Angeles",
+      "state": "CA",
+      "population": 3898747,
+      "coordinates": {
+        "lat": 34.0522,
+        "lon": -118.2437
+      },
+      "database": {
+        "success": true,
+        "city": "Los Angeles, CA",
+        "exactCount": 59,
+        "areaCount": 307,
+        "avgLat": 34.0371462779661,
+        "avgLon": -118.29951594237292,
+        "queryTime": 11
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Los Angeles, CA",
+          "success": true,
+          "facilitiesReturned": 2,
+          "totalAvailable": 2,
+          "responseTime": 321,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=CA",
+          "success": true,
+          "facilitiesReturned": 10,
+          "totalAvailable": 99,
+          "responseTime": 193,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Los Angeles&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 196,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 2,
+        "issues": []
+      }
+    },
+    {
+      "rank": 2,
+      "city": "New York",
+      "state": "NY",
+      "population": 8336817,
+      "coordinates": {
+        "lat": 40.7128,
+        "lon": -74.006
+      },
+      "database": {
+        "success": true,
+        "city": "New York, NY",
+        "exactCount": 71,
+        "areaCount": 245,
+        "avgLat": 40.76763636760562,
+        "avgLon": -73.96806531971832,
+        "queryTime": 5
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=New York, NY",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 178,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=NY",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 202,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=New York&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 184,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 3,
+      "city": "Chicago",
+      "state": "IL",
+      "population": 2746388,
+      "coordinates": {
+        "lat": 41.8781,
+        "lon": -87.6298
+      },
+      "database": {
+        "success": true,
+        "city": "Chicago, IL",
+        "exactCount": 94,
+        "areaCount": 231,
+        "avgLat": 41.851999830189676,
+        "avgLon": -87.67279126932804,
+        "queryTime": 10
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Chicago, IL",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 174,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=IL",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 180,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Chicago&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 181,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 4,
+      "city": "Houston",
+      "state": "TX",
+      "population": 2304580,
+      "coordinates": {
+        "lat": 29.7604,
+        "lon": -95.3698
+      },
+      "database": {
+        "success": true,
+        "city": "Houston, TX",
+        "exactCount": 44,
+        "areaCount": 69,
+        "avgLat": 29.739375704545466,
+        "avgLon": -95.39333737272727,
+        "queryTime": 7
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Houston, TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 197,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 197,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Houston&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 197,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 5,
+      "city": "Phoenix",
+      "state": "AZ",
+      "population": 1608139,
+      "coordinates": {
+        "lat": 33.4484,
+        "lon": -112.074
+      },
+      "database": {
+        "success": true,
+        "city": "Phoenix, AZ",
+        "exactCount": 66,
+        "areaCount": 176,
+        "avgLat": 33.499936422727274,
+        "avgLon": -112.08028766060606,
+        "queryTime": 8
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Phoenix, AZ",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 233,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=AZ",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 182,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Phoenix&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 181,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 6,
+      "city": "Philadelphia",
+      "state": "PA",
+      "population": 1603797,
+      "coordinates": {
+        "lat": 39.9526,
+        "lon": -75.1652
+      },
+      "database": {
+        "success": true,
+        "city": "Philadelphia, PA",
+        "exactCount": 43,
+        "areaCount": 121,
+        "avgLat": 39.98342242213418,
+        "avgLon": -75.15394761639305,
+        "queryTime": 7
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Philadelphia, PA",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 179,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=PA",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 177,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Philadelphia&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 186,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 7,
+      "city": "San Antonio",
+      "state": "TX",
+      "population": 1434625,
+      "coordinates": {
+        "lat": 29.4241,
+        "lon": -98.4936
+      },
+      "database": {
+        "success": true,
+        "city": "San Antonio, TX",
+        "exactCount": 23,
+        "areaCount": 26,
+        "avgLat": 29.470149763043487,
+        "avgLon": -98.48512256913044,
+        "queryTime": 6
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Antonio, TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 177,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 180,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Antonio&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 176,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 8,
+      "city": "San Diego",
+      "state": "CA",
+      "population": 1386932,
+      "coordinates": {
+        "lat": 32.7157,
+        "lon": -117.1611
+      },
+      "database": {
+        "success": true,
+        "city": "San Diego, CA",
+        "exactCount": 33,
+        "areaCount": 68,
+        "avgLat": 32.76406426060606,
+        "avgLon": -117.14421904848487,
+        "queryTime": 6
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Diego, CA",
+          "success": true,
+          "facilitiesReturned": 1,
+          "totalAvailable": 1,
+          "responseTime": 172,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=CA",
+          "success": true,
+          "facilitiesReturned": 10,
+          "totalAvailable": 99,
+          "responseTime": 183,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Diego&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 183,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 1,
+        "issues": []
+      }
+    },
+    {
+      "rank": 9,
+      "city": "Dallas",
+      "state": "TX",
+      "population": 1304379,
+      "coordinates": {
+        "lat": 32.7767,
+        "lon": -96.797
+      },
+      "database": {
+        "success": true,
+        "city": "Dallas, TX",
+        "exactCount": 22,
+        "areaCount": 69,
+        "avgLat": 32.817957978954766,
+        "avgLon": -96.80725671771529,
+        "queryTime": 5
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Dallas, TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 177,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=TX",
+          "success": true,
+          "facilitiesReturned": 0,
+          "totalAvailable": 0,
+          "responseTime": 191,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=Dallas&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 197,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 0,
+        "issues": []
+      }
+    },
+    {
+      "rank": 10,
+      "city": "San Jose",
+      "state": "CA",
+      "population": 1013240,
+      "coordinates": {
+        "lat": 37.3382,
+        "lon": -121.8863
+      },
+      "database": {
+        "success": true,
+        "city": "San Jose, CA",
+        "exactCount": 13,
+        "areaCount": 58,
+        "avgLat": 37.30814380769231,
+        "avgLon": -121.8647917692308,
+        "queryTime": 4
+      },
+      "api": [
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Jose, CA",
+          "success": true,
+          "facilitiesReturned": 1,
+          "totalAvailable": 1,
+          "responseTime": 188,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=CA",
+          "success": true,
+          "facilitiesReturned": 10,
+          "totalAvailable": 99,
+          "responseTime": 175,
+          "status": 200
+        },
+        {
+          "endpoint": "/api/v1/facilities/search",
+          "params": "location=San Jose&services=residential",
+          "success": true,
+          "facilitiesReturned": 0,
+          "responseTime": 176,
+          "status": 200
+        }
+      ],
+      "dataValidation": {
+        "valid": true,
+        "totalChecked": 1,
+        "issues": []
+      }
+    }
+  ],
+  "apiTests": [],
+  "performanceMetrics": {
+    "avgDatabaseQueryTime": 6.9,
+    "avgAPIResponseTime": 190.43333333333334
+  },
+  "dataValidation": [],
+  "errors": [],
+  "totalFacilities": 8524,
+  "successRate": 57.1
+}
