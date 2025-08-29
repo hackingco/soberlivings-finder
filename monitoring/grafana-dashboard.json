@@ -1,0 +1,231 @@
+{
+  "dashboard": {
+    "title": "SoberLivings Production Dashboard",
+    "uid": "soberlivings-prod",
+    "version": 1,
+    "timezone": "UTC",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"soberlivings\"}[5m])",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"soberlivings\",status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Errors"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"soberlivings\",status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Errors"
+          }
+        ],
+        "alert": {
+          "name": "High Error Rate",
+          "conditions": [
+            {
+              "evaluator": {"params": [0.02], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "Response Time (P95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"soberlivings\"}[5m]))",
+            "legendFormat": "P95 Latency"
+          }
+        ],
+        "alert": {
+          "name": "High Latency",
+          "conditions": [
+            {
+              "evaluator": {"params": [0.25], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "title": "Database Connections",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"soberlivings\"}",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "pg_settings_max_connections",
+            "legendFormat": "Max Connections"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "ETL Pipeline Status",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "etl_last_run_status{job=\"soberlivings-etl\"}",
+            "legendFormat": "Last Run Status"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Facilities Count",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16},
+        "targets": [
+          {
+            "expr": "facilities_total_count{job=\"soberlivings\"}",
+            "legendFormat": "Total Facilities"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "redis_hits_total / (redis_hits_total + redis_misses_total)",
+            "legendFormat": "Cache Hit Rate"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Availability",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 16},
+        "targets": [
+          {
+            "expr": "(1 - (sum(rate(http_requests_total{status=~\"5..\"}[24h])) / sum(rate(http_requests_total[24h])))) * 100",
+            "legendFormat": "24h Availability"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{container=\"soberlivings\"}[5m])",
+            "legendFormat": "{{pod}}"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{container=\"soberlivings\"}",
+            "legendFormat": "{{pod}}"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Webhook DLQ Size",
+        "type": "graph",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 26},
+        "targets": [
+          {
+            "expr": "webhook_dlq_messages{job=\"soberlivings\"}",
+            "legendFormat": "DLQ Messages"
+          }
+        ],
+        "alert": {
+          "name": "DLQ Growth",
+          "conditions": [
+            {
+              "evaluator": {"params": [100], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ]
+        }
+      },
+      {
+        "id": 12,
+        "title": "API Endpoint Performance",
+        "type": "table",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 26},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (endpoint) (rate(http_request_duration_seconds_sum{job=\"soberlivings\"}[5m]) / rate(http_request_duration_seconds_count{job=\"soberlivings\"}[5m])))",
+            "format": "table",
+            "instant": true
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 38,
+    "tags": ["production", "soberlivings"],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "current": {"text": "production", "value": "production"},
+          "options": [
+            {"text": "production", "value": "production"},
+            {"text": "staging", "value": "staging"}
+          ]
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "changes(deployment_version{job=\"soberlivings\"}[5m]) > 0",
+          "name": "Deployments",
+          "tagKeys": "version",
+          "titleFormat": "Deployment"
+        }
+      ]
+    }
+  }
+}
