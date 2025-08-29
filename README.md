@@ -1,14 +1,30 @@
 # Sober Living Facilities Finder
 
-A Node.js tool to search and export data about sober living and residential treatment facilities using the FindTreatment.gov API.
+A comprehensive full-stack application for finding and managing sober living and residential treatment facilities across the United States. Built with Next.js 14, PostgreSQL/Supabase, and integrated with the FindTreatment.gov API.
 
-## Features
+## 🚀 Project Overview
 
-- 🔍 Search facilities by location (coordinates or address)
+This project consists of two main components:
+1. **Backend CLI Tool** - Node.js tool for fetching and exporting facility data
+2. **Frontend Web Application** - Modern Next.js application with real-time search and interactive features
+
+## ✨ Key Features
+
+### Frontend Application
+- 🔍 **Advanced Search** - Search by location, services, insurance accepted
+- 🗺️ **Interactive Maps** - Visual facility locations with clustering
+- 📊 **Real-time Database** - PostgreSQL/Supabase for fast queries
+- 🤖 **AI-Enhanced Data** - Automatic website scraping with Firecrawl
+- 📱 **Mobile-First Design** - Responsive UI optimized for all devices
+- ⚡ **High Performance** - Built with Next.js 14 and React Server Components
+- 🔒 **Secure API** - Rate limiting, authentication, and data validation
+
+### CLI Tool
+- 📍 Search facilities by location (coordinates or address)
 - 🏠 Filter specifically for residential treatment services
 - 📊 Export data in JSON and CSV formats
-- 📱 Command-line interface for easy automation
-- 🗺️ Include geographic coordinates for mapping
+- 🔄 Batch processing for multiple cities
+- 📈 ETL pipeline for data enrichment
 
 ## Installation
 
