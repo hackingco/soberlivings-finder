@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "fetch": "node src/fetchFacilities.js",
+    "etl": "node src/etl-pipeline-enhanced.js",
+    "etl:monitor": "node src/etl-monitoring.js",
+    "etl:resume": "node src/etl-pipeline-enhanced.js --resume",
+    "etl:clear": "node src/etl-pipeline-enhanced.js --clear",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
@@ -20,7 +24,9 @@
     "axios": "^1.11.0",
     "commander": "^11.0.0",
     "csv-writer": "^1.6.0",
-    "pg": "^8.16.3"
+    "express": "^4.21.2",
+    "pg": "^8.16.3",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

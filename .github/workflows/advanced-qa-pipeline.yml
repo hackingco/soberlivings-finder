@@ -1,0 +1,768 @@
+# Advanced QA and Testing Pipeline
+# Comprehensive automated testing with security, performance, and quality gates
+
+name: Advanced QA Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*' ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - e2e
+          - security
+          - performance
+          - accessibility
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # =============================================================================
+  # JOB 1: Setup and Code Quality
+  # =============================================================================
+  code-quality:
+    name: Code Quality & Static Analysis
+    runs-on: ubuntu-latest
+    
+    outputs:
+      quality-score: ${{ steps.quality-check.outputs.score }}
+      security-issues: ${{ steps.security-scan.outputs.issues }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm audit --audit-level=moderate
+          
+      - name: Run ESLint with detailed reporting
+        working-directory: ./frontend
+        run: |
+          npx eslint src/ tests/ --ext .js,.jsx,.ts,.tsx \
+            --format json --output-file eslint-report.json || true
+          npx eslint src/ tests/ --ext .js,.jsx,.ts,.tsx --format stylish
+          
+      - name: TypeScript type checking
+        working-directory: ./frontend
+        run: |
+          npx tsc --noEmit --pretty
+          
+      - name: Code complexity analysis
+        working-directory: ./frontend
+        run: |
+          # Install complexity analyzer
+          npm install -g complexity-report
+          # Analyze code complexity
+          cr --format json --output complexity-report.json src/ || true
+          
+      - name: Security vulnerability scan
+        id: security-scan
+        working-directory: ./frontend
+        run: |
+          # Run npm audit
+          npm audit --json > audit-report.json || true
+          
+          # Install and run additional security tools
+          npm install -g audit-ci
+          audit-ci --moderate --output-format json || true
+          
+          # Count security issues
+          ISSUES=$(jq '.vulnerabilities | length' audit-report.json || echo "0")
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+          
+      - name: Code quality scoring
+        id: quality-check
+        working-directory: ./frontend
+        run: |
+          # Calculate quality score based on various metrics
+          SCORE=100
+          
+          # ESLint penalties
+          ESLINT_ERRORS=$(jq '[.[] | select(.errorCount > 0)] | length' eslint-report.json || echo "0")
+          ESLINT_WARNINGS=$(jq '[.[] | select(.warningCount > 0)] | length' eslint-report.json || echo "0")
+          SCORE=$((SCORE - ESLINT_ERRORS * 5 - ESLINT_WARNINGS * 2))
+          
+          # Complexity penalties
+          HIGH_COMPLEXITY=$(jq '[.reports[] | select(.complexity.cyclomatic > 10)] | length' complexity-report.json || echo "0")
+          SCORE=$((SCORE - HIGH_COMPLEXITY * 3))
+          
+          # Security penalties
+          SECURITY_ISSUES=${{ steps.security-scan.outputs.issues }}
+          SCORE=$((SCORE - SECURITY_ISSUES * 10))
+          
+          # Ensure score doesn't go below 0
+          SCORE=$((SCORE > 0 ? SCORE : 0))
+          
+          echo "Quality Score: $SCORE/100"
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports
+          path: |
+            frontend/eslint-report.json
+            frontend/complexity-report.json
+            frontend/audit-report.json
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 2: Unit and Integration Testing
+  # =============================================================================
+  unit-integration-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    if: github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'unit' || github.event.inputs.test_suite == 'integration' || github.event.inputs.test_suite == ''
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_USER: testuser
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Setup test environment
+        working-directory: ./frontend
+        run: |
+          # Create test environment file
+          cat > .env.test << EOF
+          NODE_ENV=test
+          DATABASE_URL=postgresql://testuser:testpass@localhost:5432/testdb
+          REDIS_URL=redis://localhost:6379
+          TEST_TIMEOUT=30000
+          JEST_TIMEOUT=60000
+          EOF
+          
+      - name: Run unit tests with coverage
+        working-directory: ./frontend
+        run: |
+          npm run test:unit -- --coverage --watchAll=false --ci \
+            --testResultsProcessor=jest-junit \
+            --coverageReporters=text-lcov --coverageReporters=json-summary
+            
+      - name: Run integration tests
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          REDIS_URL: redis://localhost:6379
+        run: |
+          npm run test:integration -- --watchAll=false --ci \
+            --testResultsProcessor=jest-junit
+            
+      - name: Generate test summary
+        if: always()
+        working-directory: ./frontend
+        run: |
+          # Create test summary
+          echo "# Test Results Summary" > test-summary.md
+          echo "" >> test-summary.md
+          
+          # Unit test results
+          if [ -f "coverage/coverage-summary.json" ]; then
+            COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+            echo "📊 **Code Coverage**: ${COVERAGE}%" >> test-summary.md
+          fi
+          
+          # Test counts from junit files
+          if [ -f "junit.xml" ]; then
+            TOTAL_TESTS=$(xmllint --xpath "//testsuite/@tests" junit.xml | grep -o '[0-9]\+' || echo "0")
+            FAILED_TESTS=$(xmllint --xpath "//testsuite/@failures" junit.xml | grep -o '[0-9]\+' || echo "0")
+            PASSED_TESTS=$((TOTAL_TESTS - FAILED_TESTS))
+            
+            echo "✅ **Tests Passed**: $PASSED_TESTS" >> test-summary.md
+            echo "❌ **Tests Failed**: $FAILED_TESTS" >> test-summary.md
+            echo "📈 **Total Tests**: $TOTAL_TESTS" >> test-summary.md
+          fi
+          
+      - name: Comment test results on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('./frontend/test-summary.md')) {
+              const summary = fs.readFileSync('./frontend/test-summary.md', 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            }
+            
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            frontend/junit.xml
+            frontend/coverage/
+            frontend/test-summary.md
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 3: Security Testing
+  # =============================================================================
+  security-testing:
+    name: Security Analysis & Testing
+    runs-on: ubuntu-latest
+    needs: code-quality
+    if: github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'security' || github.event.inputs.test_suite == '' || github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Start application for security testing
+        working-directory: ./frontend
+        run: |
+          # Start the application in test mode
+          NODE_ENV=test npm run build
+          NODE_ENV=test npm start &
+          
+          # Wait for application to be ready
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/api/health; then
+              echo "Application is ready"
+              break
+            fi
+            echo "Waiting for application... ($i/30)"
+            sleep 2
+          done
+          
+      - name: Run comprehensive security tests
+        working-directory: ./frontend
+        run: |
+          # Run our custom security test suite
+          npm run test -- tests/security/security-testing.test.js --watchAll=false --ci
+          
+      - name: OWASP ZAP security scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -m 5 -T 60'
+          
+      - name: Bandit security scan (if Python files exist)
+        if: hashFiles('**/*.py') != ''
+        run: |
+          pip install bandit
+          bandit -r . -f json -o bandit-report.json || true
+          
+      - name: Semgrep security scan
+        run: |
+          pip install semgrep
+          semgrep --config=auto --json --output=semgrep-report.json . || true
+          
+      - name: Generate security report
+        run: |
+          echo "# 🔒 Security Analysis Report" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Timestamp**: $(date -u)" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          # ZAP results
+          if [ -f "report_json.json" ]; then
+            HIGH_RISK=$(jq '[.site[].alerts[] | select(.riskdesc | contains("High"))] | length' report_json.json || echo "0")
+            MEDIUM_RISK=$(jq '[.site[].alerts[] | select(.riskdesc | contains("Medium"))] | length' report_json.json || echo "0")
+            
+            echo "## OWASP ZAP Scan Results" >> security-summary.md
+            echo "- 🔴 High Risk: $HIGH_RISK" >> security-summary.md
+            echo "- 🟡 Medium Risk: $MEDIUM_RISK" >> security-summary.md
+            echo "" >> security-summary.md
+          fi
+          
+          # Semgrep results
+          if [ -f "semgrep-report.json" ]; then
+            SEMGREP_ISSUES=$(jq '.results | length' semgrep-report.json || echo "0")
+            echo "## Semgrep Code Analysis" >> security-summary.md
+            echo "- Issues Found: $SEMGREP_ISSUES" >> security-summary.md
+            echo "" >> security-summary.md
+          fi
+          
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            report_json.json
+            bandit-report.json
+            semgrep-report.json
+            security-summary.md
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 4: End-to-End Testing
+  # =============================================================================
+  e2e-testing:
+    name: End-to-End Testing
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests]
+    if: github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'e2e' || github.event.inputs.test_suite == ''
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Install Playwright
+        working-directory: ./frontend
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+        
+      - name: Build and start application
+        working-directory: ./frontend
+        run: |
+          npm run build
+          npm start &
+          
+          # Wait for application
+          for i in {1..30}; do
+            if curl -f http://localhost:3000; then break; fi
+            sleep 2
+          done
+          
+      - name: Run E2E tests
+        working-directory: ./frontend
+        run: |
+          # Run existing E2E tests
+          npm run test:e2e -- --watchAll=false --ci
+          
+          # If Playwright is configured, run those tests too
+          if [ -f "playwright.config.js" ]; then
+            npx playwright test --browser=${{ matrix.browser }}
+          fi
+          
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results-${{ matrix.browser }}
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 5: Performance Testing
+  # =============================================================================
+  performance-testing:
+    name: Performance & Load Testing
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests]
+    if: github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'performance' || github.event.inputs.test_suite == ''
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Start application for performance testing
+        working-directory: ./frontend
+        run: |
+          npm run build
+          NODE_ENV=production npm start &
+          
+          # Wait for application
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/api/health; then break; fi
+            sleep 2
+          done
+          
+      - name: Run performance tests
+        working-directory: ./frontend
+        run: |
+          # Run our custom performance test suite
+          npm run test -- tests/performance/performance-monitoring.test.js --watchAll=false --ci --testTimeout=120000
+          
+      - name: Install and run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.12.x
+          lhci collect --url=http://localhost:3000
+          lhci assert --preset=lighthouse:recommended
+          
+      - name: Install and run Artillery load testing
+        run: |
+          npm install -g artillery
+          
+          # Create Artillery test configuration
+          cat > artillery-test.yml << EOF
+          config:
+            target: 'http://localhost:3000'
+            phases:
+              - duration: 60
+                arrivalRate: 5
+                name: "Warm up"
+              - duration: 120
+                arrivalRate: 10
+                name: "Load test"
+          scenarios:
+            - name: "Health check and search"
+              weight: 100
+              flow:
+                - get:
+                    url: "/api/health"
+                - get:
+                    url: "/api/facilities/search?limit=10"
+          EOF
+          
+          artillery run artillery-test.yml --output artillery-report.json
+          artillery report artillery-report.json --output artillery-report.html
+          
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-reports
+          path: |
+            .lighthouseci/
+            artillery-report.json
+            artillery-report.html
+            frontend/test-reports/performance-*.json
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 6: Accessibility Testing
+  # =============================================================================
+  accessibility-testing:
+    name: Accessibility Testing
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests]
+    if: github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'accessibility' || github.event.inputs.test_suite == ''
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Start application
+        working-directory: ./frontend
+        run: |
+          npm run build
+          npm start &
+          
+          # Wait for application
+          for i in {1..30}; do
+            if curl -f http://localhost:3000; then break; fi
+            sleep 2
+          done
+          
+      - name: Install accessibility testing tools
+        run: |
+          npm install -g @axe-core/cli
+          npm install -g pa11y-ci
+          
+      - name: Run Axe accessibility tests
+        run: |
+          axe http://localhost:3000 --reporter json --output axe-report.json || true
+          axe http://localhost:3000 --reporter spec
+          
+      - name: Run Pa11y accessibility tests
+        run: |
+          echo '{"urls": ["http://localhost:3000", "http://localhost:3000/search"]}' > .pa11yci
+          pa11y-ci --reporter json > pa11y-report.json || true
+          pa11y-ci --reporter cli
+          
+      - name: Generate accessibility report
+        run: |
+          echo "# ♿ Accessibility Test Report" > accessibility-summary.md
+          echo "" >> accessibility-summary.md
+          echo "**Timestamp**: $(date -u)" >> accessibility-summary.md
+          echo "" >> accessibility-summary.md
+          
+          # Axe results
+          if [ -f "axe-report.json" ]; then
+            VIOLATIONS=$(jq '.violations | length' axe-report.json || echo "0")
+            echo "## Axe-Core Results" >> accessibility-summary.md
+            echo "- Violations Found: $VIOLATIONS" >> accessibility-summary.md
+            
+            if [ "$VIOLATIONS" -gt "0" ]; then
+              echo "### Issues:" >> accessibility-summary.md
+              jq -r '.violations[] | "- " + .impact + ": " + .help' axe-report.json >> accessibility-summary.md || true
+            fi
+            echo "" >> accessibility-summary.md
+          fi
+          
+          # Pa11y results
+          if [ -f "pa11y-report.json" ]; then
+            echo "## Pa11y Results" >> accessibility-summary.md
+            TOTAL_ISSUES=$(jq '[.[].issues | length] | add' pa11y-report.json || echo "0")
+            echo "- Total Issues: $TOTAL_ISSUES" >> accessibility-summary.md
+            echo "" >> accessibility-summary.md
+          fi
+          
+      - name: Upload accessibility reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-reports
+          path: |
+            axe-report.json
+            pa11y-report.json
+            accessibility-summary.md
+          retention-days: 30
+
+  # =============================================================================
+  # JOB 7: Quality Gate and Reporting
+  # =============================================================================
+  quality-gate:
+    name: Quality Gate & Final Report
+    runs-on: ubuntu-latest
+    needs: [code-quality, unit-integration-tests, security-testing, e2e-testing, performance-testing, accessibility-testing]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./reports
+          
+      - name: Generate comprehensive quality report
+        run: |
+          echo "# 📊 Comprehensive Quality Assessment Report" > QUALITY_REPORT.md
+          echo "" >> QUALITY_REPORT.md
+          echo "**Repository**: ${{ github.repository }}" >> QUALITY_REPORT.md
+          echo "**Branch**: ${{ github.ref_name }}" >> QUALITY_REPORT.md
+          echo "**Commit**: ${{ github.sha }}" >> QUALITY_REPORT.md
+          echo "**Workflow Run**: ${{ github.run_id }}" >> QUALITY_REPORT.md
+          echo "**Timestamp**: $(date -u)" >> QUALITY_REPORT.md
+          echo "" >> QUALITY_REPORT.md
+          
+          # Code Quality Score
+          echo "## 🎯 Quality Metrics" >> QUALITY_REPORT.md
+          echo "- **Code Quality Score**: ${{ needs.code-quality.outputs.quality-score }}/100" >> QUALITY_REPORT.md
+          echo "- **Security Issues**: ${{ needs.code-quality.outputs.security-issues }}" >> QUALITY_REPORT.md
+          echo "" >> QUALITY_REPORT.md
+          
+          # Test Results Summary
+          echo "## 🧪 Test Results Summary" >> QUALITY_REPORT.md
+          
+          # Unit/Integration Tests
+          if [ "${{ needs.unit-integration-tests.result }}" == "success" ]; then
+            echo "- ✅ **Unit & Integration Tests**: PASSED" >> QUALITY_REPORT.md
+          else
+            echo "- ❌ **Unit & Integration Tests**: FAILED" >> QUALITY_REPORT.md
+          fi
+          
+          # Security Tests
+          if [ "${{ needs.security-testing.result }}" == "success" ]; then
+            echo "- ✅ **Security Testing**: PASSED" >> QUALITY_REPORT.md
+          else
+            echo "- ❌ **Security Testing**: FAILED" >> QUALITY_REPORT.md
+          fi
+          
+          # E2E Tests
+          if [ "${{ needs.e2e-testing.result }}" == "success" ]; then
+            echo "- ✅ **End-to-End Tests**: PASSED" >> QUALITY_REPORT.md
+          else
+            echo "- ❌ **End-to-End Tests**: FAILED" >> QUALITY_REPORT.md
+          fi
+          
+          # Performance Tests
+          if [ "${{ needs.performance-testing.result }}" == "success" ]; then
+            echo "- ✅ **Performance Tests**: PASSED" >> QUALITY_REPORT.md
+          else
+            echo "- ❌ **Performance Tests**: FAILED" >> QUALITY_REPORT.md
+          fi
+          
+          # Accessibility Tests
+          if [ "${{ needs.accessibility-testing.result }}" == "success" ]; then
+            echo "- ✅ **Accessibility Tests**: PASSED" >> QUALITY_REPORT.md
+          else
+            echo "- ❌ **Accessibility Tests**: FAILED" >> QUALITY_REPORT.md
+          fi
+          
+          echo "" >> QUALITY_REPORT.md
+          
+          # Quality Gate Decision
+          QUALITY_SCORE=${{ needs.code-quality.outputs.quality-score }}
+          SECURITY_ISSUES=${{ needs.code-quality.outputs.security-issues }}
+          
+          echo "## 🚦 Quality Gate Decision" >> QUALITY_REPORT.md
+          
+          if [ "$QUALITY_SCORE" -ge "80" ] && [ "$SECURITY_ISSUES" -eq "0" ] && \
+             [ "${{ needs.unit-integration-tests.result }}" == "success" ]; then
+            echo "### 🟢 **QUALITY GATE: PASSED**" >> QUALITY_REPORT.md
+            echo "All quality criteria met. Ready for deployment." >> QUALITY_REPORT.md
+            echo "QUALITY_GATE_STATUS=PASSED" >> $GITHUB_ENV
+          elif [ "$QUALITY_SCORE" -ge "60" ] && [ "$SECURITY_ISSUES" -le "2" ]; then
+            echo "### 🟡 **QUALITY GATE: WARNING**" >> QUALITY_REPORT.md
+            echo "Quality acceptable but improvements needed." >> QUALITY_REPORT.md
+            echo "QUALITY_GATE_STATUS=WARNING" >> $GITHUB_ENV
+          else
+            echo "### 🔴 **QUALITY GATE: FAILED**" >> QUALITY_REPORT.md
+            echo "Quality criteria not met. Deployment blocked." >> QUALITY_REPORT.md
+            echo "QUALITY_GATE_STATUS=FAILED" >> $GITHUB_ENV
+          fi
+          
+          echo "" >> QUALITY_REPORT.md
+          
+          # Add recommendations
+          echo "## 💡 Recommendations" >> QUALITY_REPORT.md
+          if [ "$QUALITY_SCORE" -lt "80" ]; then
+            echo "- 📈 Improve code quality score (current: $QUALITY_SCORE/100)" >> QUALITY_REPORT.md
+          fi
+          if [ "$SECURITY_ISSUES" -gt "0" ]; then
+            echo "- 🔒 Address $SECURITY_ISSUES security issues" >> QUALITY_REPORT.md
+          fi
+          echo "- 🧪 Maintain high test coverage" >> QUALITY_REPORT.md
+          echo "- 🚀 Monitor performance metrics" >> QUALITY_REPORT.md
+          echo "- ♿ Ensure accessibility compliance" >> QUALITY_REPORT.md
+          
+      - name: Create or update quality report issue
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('QUALITY_REPORT.md', 'utf8');
+            
+            // Look for existing quality report issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['quality-report'],
+              state: 'open'
+            });
+            
+            const title = '📊 Quality Assessment Report';
+            
+            if (issues.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: report
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: report,
+                labels: ['quality-report']
+              });
+            }
+            
+      - name: Fail workflow if quality gate failed
+        if: env.QUALITY_GATE_STATUS == 'FAILED'
+        run: |
+          echo "❌ Quality gate failed. Workflow will be marked as failed."
+          exit 1
+          
+      - name: Upload final quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-report
+          path: QUALITY_REPORT.md
+          retention-days: 90
