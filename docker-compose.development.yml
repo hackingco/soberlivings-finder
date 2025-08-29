@@ -27,7 +27,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.development
       args:
         - NODE_ENV=development
     container_name: soberlivings_frontend_dev
