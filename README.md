@@ -26,13 +26,63 @@ This project consists of two main components:
 - 🔄 Batch processing for multiple cities
 - 📈 ETL pipeline for data enrichment
 
-## Installation
+## 🛠️ Tech Stack
 
+- **Frontend Framework**: Next.js 14 with App Router
+- **Database**: PostgreSQL with Prisma ORM / Supabase
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Backend**: Node.js with Express
+- **API Integration**: FindTreatment.gov REST API
+- **Web Scraping**: Firecrawl API
+- **Deployment**: Vercel (optimized for edge functions)
+- **Type Safety**: TypeScript throughout
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL database or Supabase account
+- Git
+
+### Clone the Repository
 ```bash
+git clone https://github.com/hackingco/soberlivings-finder.git
+cd soberlivings-finder
+```
+
+### Install Dependencies
+```bash
+# Install root dependencies
+npm install
+
+# Install frontend dependencies
+cd frontend
 npm install
 ```
 
-## Quick Start
+## 🚀 Quick Start
+
+### Option 1: Frontend Web Application
+
+1. **Set up environment variables**:
+```bash
+cd frontend
+cp .env.example .env.local
+# Edit .env.local with your database and API credentials
+```
+
+2. **Set up the database**:
+```bash
+npm run db:setup
+```
+
+3. **Start the development server**:
+```bash
+npm run dev
+# Open http://localhost:3000
+```
+
+### Option 2: CLI Tool
 
 ### Basic Search (San Francisco area)
 ```bash
