@@ -1,0 +1,89 @@
+# WordPress Plugin Development Stack
+# Isolated from main application - no port/network conflicts
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wp-sober-db
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: wp_secure_2024
+      MYSQL_ROOT_PASSWORD: root_secure_2024
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wp-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  wordpress:
+    image: wordpress:6.5-php8.2-apache
+    container_name: wp-sober-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"  # WP admin: http://localhost:8080
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wp_secure_2024
+      WORDPRESS_DB_NAME: wordpress
+      WP_DEBUG: "true"
+      WP_DEBUG_LOG: "true"
+      WP_DEBUG_DISPLAY: "false"
+      # Integration with main app
+      SOBER_API_BASE: "http://host.docker.internal:3001/api"
+      SOBER_API_KEY: "${SOBER_API_KEY:-development_key}"
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./plugins/sober-living-portal:/var/www/html/wp-content/plugins/sober-living-portal
+    networks:
+      - wp-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Access host services
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: wp-sober-pma
+    depends_on:
+      - db
+    ports:
+      - "8081:80"  # phpMyAdmin: http://localhost:8081
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root_secure_2024
+    networks:
+      - wp-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: wp-sober-mail
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI: http://localhost:8025
+    networks:
+      - wp-network
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: wp-sober-redis
+    ports:
+      - "6380:6379"  # Different port from main app
+    networks:
+      - wp-network
+
+networks:
+  wp-network:
+    name: wp-sober-network
+    driver: bridge
+
+volumes:
+  db_data:
+    name: wp-sober-db-data
