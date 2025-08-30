@@ -1,0 +1,267 @@
+name: Security and Secrets Management
+
+on:
+  schedule:
+    # Run security checks weekly on Sunday at 2 AM
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.env*'
+      - '**/secrets.yml'
+      - '**/config.yml'
+
+jobs:
+  secret-scanning:
+    name: Scan for Exposed Secrets
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better scanning
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for hardcoded secrets
+        run: |
+          # Custom checks for common secret patterns
+          echo "Checking for hardcoded secrets..."
+          
+          # Check for Supabase keys
+          if grep -r "sbp_[a-f0-9]{40}" . --exclude-dir=.git --exclude-dir=node_modules; then
+            echo "::error::Found hardcoded Supabase access token!"
+            exit 1
+          fi
+          
+          # Check for database passwords
+          if grep -rE "PASSWORD=['\"]?[^'\"\s]{8,}" . --exclude-dir=.git --exclude-dir=node_modules --exclude="*.md"; then
+            echo "::warning::Found potential hardcoded password"
+          fi
+          
+          # Check for API keys
+          if grep -rE "(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[a-zA-Z0-9]{32,}" . --exclude-dir=.git --exclude-dir=node_modules --exclude="*.md"; then
+            echo "::warning::Found potential API key"
+          fi
+
+  dependency-security:
+    name: Security Audit Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Audit NPM packages
+        working-directory: ./frontend
+        run: |
+          npm audit --audit-level=moderate || true
+          npm audit fix --audit-level=moderate --dry-run || true
+
+      - name: Check for known vulnerabilities
+        working-directory: ./frontend
+        run: |
+          npx audit-ci --moderate || echo "::warning::Found vulnerabilities in dependencies"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Audit Composer packages
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          composer audit || echo "::warning::Found vulnerabilities in PHP dependencies"
+
+  rotate-secrets:
+    name: Rotate Secrets Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Check secret age
+        run: |
+          # This is a placeholder for checking secret rotation
+          # In practice, you'd track secret creation dates in a secure way
+          
+          echo "Checking if secrets need rotation..."
+          
+          # Example: Check if it's been 90 days since last rotation
+          # You could store last rotation date in GitHub secrets or external vault
+          
+          current_date=$(date +%s)
+          last_rotation="${{ secrets.LAST_SECRET_ROTATION }}"
+          
+          if [ -z "$last_rotation" ]; then
+            echo "::warning::No last rotation date found. Please set LAST_SECRET_ROTATION secret."
+          else
+            days_since=$((($current_date - $last_rotation) / 86400))
+            if [ $days_since -gt 90 ]; then
+              echo "::error::Secrets are $days_since days old. Rotation required!"
+              exit 1
+            else
+              echo "✅ Secrets are $days_since days old. No rotation needed yet."
+            fi
+          fi
+
+      - name: Create rotation reminder issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '🔐 Secret Rotation Required';
+            const body = `
+            ## Action Required: Rotate Secrets
+            
+            It's been more than 90 days since the last secret rotation.
+            
+            ### Secrets to Rotate:
+            - [ ] SUPABASE_ACCESS_TOKEN
+            - [ ] DATABASE_URL (production)
+            - [ ] SUPABASE_SERVICE_ROLE_KEY
+            - [ ] NEXTAUTH_SECRET
+            - [ ] FIRECRAWL_API_KEY
+            
+            ### Steps:
+            1. Generate new secrets in respective services
+            2. Update GitHub Secrets
+            3. Update LAST_SECRET_ROTATION with current timestamp
+            4. Test deployments with new secrets
+            
+            **Priority**: High
+            **Due Date**: Within 7 days
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'maintenance', 'high-priority']
+            });
+
+  security-headers:
+    name: Check Security Headers
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Check production security headers
+        run: |
+          echo "Checking security headers on production..."
+          
+          headers=$(curl -s -I "${{ secrets.PRODUCTION_URL }}")
+          
+          # Check for important security headers
+          security_headers=(
+            "X-Frame-Options"
+            "X-Content-Type-Options"
+            "Strict-Transport-Security"
+            "Content-Security-Policy"
+            "X-XSS-Protection"
+          )
+          
+          for header in "${security_headers[@]}"; do
+            if echo "$headers" | grep -qi "$header"; then
+              echo "✅ $header is present"
+            else
+              echo "::warning::Missing security header: $header"
+            fi
+          done
+
+  database-security:
+    name: Database Security Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Check database security settings
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          # Install PostgreSQL client
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          
+          # Extract connection details
+          export PGPASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+          export PGHOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^:]*\):.*/\1/p')
+          export PGUSER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+          export PGDATABASE=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
+          
+          # Check for common security issues
+          echo "Checking database security..."
+          
+          # Check SSL connection
+          psql -c "SELECT current_setting('ssl') as ssl_enabled;" || echo "::warning::Could not verify SSL status"
+          
+          # Check for default passwords (should fail)
+          PGPASSWORD=postgres psql -h $PGHOST -U postgres -c "SELECT 1;" 2>/dev/null && echo "::error::Default password works!" || echo "✅ Default password disabled"
+          
+          # Check row-level security
+          psql -c "
+            SELECT 
+              schemaname, 
+              tablename, 
+              rowsecurity 
+            FROM pg_tables 
+            WHERE schemaname = 'public';
+          " || true
+
+  generate-security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [secret-scanning, dependency-security, security-headers, database-security]
+    if: always()
+    
+    steps:
+      - name: Generate report
+        run: |
+          cat << EOF > security-report.md
+          # Security Scan Report
+          
+          **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Run ID**: ${{ github.run_id }}
+          
+          ## Scan Results
+          
+          | Check | Status |
+          |-------|--------|
+          | Secret Scanning | ${{ needs.secret-scanning.result }} |
+          | Dependency Audit | ${{ needs.dependency-security.result }} |
+          | Security Headers | ${{ needs.security-headers.result }} |
+          | Database Security | ${{ needs.database-security.result }} |
+          
+          ## Recommendations
+          
+          1. Review any warnings or errors above
+          2. Rotate secrets if older than 90 days
+          3. Update dependencies with known vulnerabilities
+          4. Ensure all security headers are properly configured
+          
+          [View Full Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          
+          cat security-report.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report-${{ github.run_id }}
+          path: security-report.md

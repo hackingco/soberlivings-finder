@@ -1,0 +1,411 @@
+name: WordPress Plugin Release
+
+on:
+  push:
+    tags:
+      - 'plugin-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Plugin version (e.g., 1.0.1)'
+        required: true
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-plugin:
+    name: Build WordPress Plugin
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2, wp-cli
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/plugin-v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building plugin version: $VERSION"
+
+      - name: Update plugin version
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          # Update version in main plugin file
+          sed -i "s/Version: .*/Version: ${{ steps.version.outputs.version }}/" sober-living-portal.php
+          
+          # Update version in readme.txt
+          sed -i "s/Stable tag: .*/Stable tag: ${{ steps.version.outputs.version }}/" readme.txt
+          
+          # Update version in package.json if exists
+          if [ -f package.json ]; then
+            npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          fi
+
+      - name: Install PHP dependencies
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction
+          composer dump-autoload --optimize
+
+      - name: Build assets (if applicable)
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run build || echo "No build script found"
+          fi
+
+      - name: Run plugin tests
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          # Install dev dependencies for testing
+          composer install
+          
+          # Run PHP CodeSniffer
+          vendor/bin/phpcs --standard=WordPress --extensions=php . || true
+          
+          # Run PHPUnit tests if available
+          if [ -f phpunit.xml ]; then
+            vendor/bin/phpunit || true
+          fi
+          
+          # Remove dev dependencies after testing
+          composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Generate plugin documentation
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          # Generate changelog from git history
+          cat > CHANGELOG.md << EOF
+          # Changelog
+          
+          ## Version ${{ steps.version.outputs.version }}
+          
+          Release Date: $(date +"%Y-%m-%d")
+          
+          ### Changes
+          EOF
+          
+          # Add recent commits as changes
+          git log --pretty=format:"- %s" -n 10 >> CHANGELOG.md
+          
+          # Generate readme for WordPress.org
+          cat > readme.txt << EOF
+          === Sober Living Portal ===
+          Contributors: soberlivings
+          Tags: recovery, sober-living, facilities, directory, healthcare
+          Requires at least: 5.8
+          Tested up to: 6.4
+          Requires PHP: 7.4
+          Stable tag: ${{ steps.version.outputs.version }}
+          License: GPLv2 or later
+          License URI: https://www.gnu.org/licenses/gpl-2.0.html
+          
+          Connect your WordPress site to the SoberLivings.com API for displaying sober living facilities.
+          
+          == Description ==
+          
+          The Sober Living Portal plugin allows WordPress sites to display and search sober living facilities
+          from the comprehensive SoberLivings.com database.
+          
+          = Features =
+          
+          * Search facilities by location
+          * Filter by services and amenities
+          * Interactive map display
+          * Mobile-responsive design
+          * Customizable display templates
+          * Caching for optimal performance
+          
+          == Installation ==
+          
+          1. Upload the plugin files to the \`/wp-content/plugins/sober-living-portal\` directory
+          2. Activate the plugin through the 'Plugins' screen in WordPress
+          3. Configure API settings in Settings > Sober Living Portal
+          4. Use the \`[sober_facility_search]\` shortcode in any page or post
+          
+          == Frequently Asked Questions ==
+          
+          = How do I get an API key? =
+          
+          Visit https://soberlivings.com/api to register for an API key.
+          
+          = Can I customize the appearance? =
+          
+          Yes, the plugin includes customizable templates and CSS hooks.
+          
+          == Changelog ==
+          
+          = ${{ steps.version.outputs.version }} =
+          * See CHANGELOG.md for detailed changes
+          
+          == Upgrade Notice ==
+          
+          = ${{ steps.version.outputs.version }} =
+          This version includes bug fixes and performance improvements.
+          EOF
+
+      - name: Create plugin ZIP
+        run: |
+          cd wordpress-plugin/plugins
+          
+          # Create clean plugin directory
+          mkdir -p sober-living-portal-build
+          cp -r sober-living-portal/* sober-living-portal-build/
+          
+          # Remove development files
+          cd sober-living-portal-build
+          rm -rf .git .github tests node_modules .gitignore \
+                 composer.json composer.lock package.json package-lock.json \
+                 phpunit.xml .phpcs.xml webpack.config.js \
+                 *.log *.md .env* .DS_Store
+          
+          # Create ZIP
+          cd ..
+          zip -r sober-living-portal-${{ steps.version.outputs.version }}.zip sober-living-portal-build
+          
+          # Also create a latest.zip for easy access
+          cp sober-living-portal-${{ steps.version.outputs.version }}.zip sober-living-portal-latest.zip
+          
+          echo "Plugin ZIP created successfully"
+
+      - name: Generate checksums
+        working-directory: ./wordpress-plugin/plugins
+        run: |
+          sha256sum sober-living-portal-${{ steps.version.outputs.version }}.zip > checksums.txt
+          md5sum sober-living-portal-${{ steps.version.outputs.version }}.zip >> checksums.txt
+          cat checksums.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-plugin-${{ steps.version.outputs.version }}
+          path: |
+            wordpress-plugin/plugins/sober-living-portal-${{ steps.version.outputs.version }}.zip
+            wordpress-plugin/plugins/sober-living-portal-latest.zip
+            wordpress-plugin/plugins/checksums.txt
+            wordpress-plugin/plugins/sober-living-portal/CHANGELOG.md
+            wordpress-plugin/plugins/sober-living-portal/readme.txt
+
+  test-plugin:
+    name: Test Plugin Installation
+    runs-on: ubuntu-latest
+    needs: build-plugin
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Download plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wordpress-plugin-${{ needs.build-plugin.outputs.version }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli, gd, xml, curl, mbstring, zip
+          tools: wp-cli
+
+      - name: Install WordPress
+        run: |
+          # Download WordPress
+          wp core download --path=/tmp/wordpress
+          
+          # Configure WordPress
+          cd /tmp/wordpress
+          wp config create \
+            --dbname=wordpress_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=127.0.0.1 \
+            --skip-check
+          
+          # Install WordPress
+          wp core install \
+            --url=http://localhost \
+            --title="Test Site" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@test.com \
+            --skip-email
+
+      - name: Install and activate plugin
+        run: |
+          cd /tmp/wordpress
+          
+          # Install plugin from ZIP
+          wp plugin install $GITHUB_WORKSPACE/sober-living-portal-*.zip
+          
+          # Activate plugin
+          wp plugin activate sober-living-portal
+          
+          # Verify activation
+          wp plugin list --status=active --format=json | grep sober-living-portal
+
+      - name: Test plugin functionality
+        run: |
+          cd /tmp/wordpress
+          
+          # Create a test page with shortcode
+          page_id=$(wp post create \
+            --post_type=page \
+            --post_title="Test Facilities" \
+            --post_content='[sober_facility_search state="CA"]' \
+            --post_status=publish \
+            --porcelain)
+          
+          echo "Created test page: $page_id"
+          
+          # Test if shortcode is registered
+          wp eval 'echo shortcode_exists("sober_facility_search") ? "Shortcode exists" : "Shortcode missing";'
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-plugin, test-plugin]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wordpress-plugin-${{ needs.build-plugin.outputs.version }}
+
+      - name: Create release notes
+        id: notes
+        run: |
+          cat > release-notes.md << EOF
+          # WordPress Plugin Release v${{ needs.build-plugin.outputs.version }}
+          
+          ## 📦 Installation
+          
+          1. Download \`sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip\`
+          2. In WordPress Admin, go to Plugins → Add New → Upload Plugin
+          3. Choose the ZIP file and click Install Now
+          4. Activate the plugin
+          
+          ## 🚀 What's New
+          
+          See CHANGELOG.md for detailed changes.
+          
+          ## 📋 Checksums
+          
+          \`\`\`
+          $(cat checksums.txt)
+          \`\`\`
+          
+          ## 🔧 Configuration
+          
+          After activation:
+          1. Go to Settings → Sober Living Portal
+          2. Configure your API endpoint
+          3. Add \`[sober_facility_search]\` shortcode to any page
+          
+          ## 📚 Documentation
+          
+          - [Setup Guide](https://github.com/${{ github.repository }}/wiki/WordPress-Plugin-Setup)
+          - [Shortcode Reference](https://github.com/${{ github.repository }}/wiki/Shortcode-Reference)
+          - [Troubleshooting](https://github.com/${{ github.repository }}/wiki/Troubleshooting)
+          
+          ## 🐛 Bug Reports
+          
+          Please report issues at: https://github.com/${{ github.repository }}/issues
+          EOF
+          
+          cat release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: plugin-v${{ needs.build-plugin.outputs.version }}
+          name: WordPress Plugin v${{ needs.build-plugin.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          files: |
+            sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip
+            sober-living-portal-latest.zip
+            checksums.txt
+            CHANGELOG.md
+            readme.txt
+
+      - name: Notify WordPress.org (optional)
+        if: github.event.inputs.prerelease != 'true'
+        run: |
+          echo "Ready to submit to WordPress.org plugin directory"
+          echo "Manual submission required at: https://wordpress.org/plugins/developers/add/"
+          echo "Plugin ZIP: sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip"
+
+  update-documentation:
+    name: Update Documentation
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update README
+        run: |
+          # Update main README with latest plugin version
+          sed -i "s/WordPress Plugin: v.*/WordPress Plugin: v${{ needs.build-plugin.outputs.version }}/" README.md || true
+          
+          # Create or update plugin documentation
+          cat > wordpress-plugin/LATEST_RELEASE.md << EOF
+          # Latest WordPress Plugin Release
+          
+          **Version**: ${{ needs.build-plugin.outputs.version }}
+          **Release Date**: $(date +"%Y-%m-%d")
+          **Download**: [sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip](https://github.com/${{ github.repository }}/releases/download/plugin-v${{ needs.build-plugin.outputs.version }}/sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip)
+          
+          ## Quick Install
+          
+          \`\`\`bash
+          # Download latest release
+          wget https://github.com/${{ github.repository }}/releases/download/plugin-v${{ needs.build-plugin.outputs.version }}/sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip
+          
+          # Install via WP-CLI
+          wp plugin install sober-living-portal-${{ needs.build-plugin.outputs.version }}.zip --activate
+          \`\`\`
+          EOF
+
+      - name: Commit documentation updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || git commit -m "📚 Update documentation for plugin v${{ needs.build-plugin.outputs.version }}"
+          git push || echo "No changes to push"

@@ -1,0 +1,70 @@
+# Simplified Staging Configuration for Quick Testing
+
+networks:
+  staging-net:
+    driver: bridge
+
+volumes:
+  staging_postgres_data:
+  staging_redis_data:
+
+services:
+  # Application
+  app-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: soberlivings-staging-app
+    ports:
+      - "3002:3000"
+    environment:
+      NODE_ENV: staging
+      DATABASE_URL: postgresql://postgres:postgres@postgres-staging:5432/soberlivings_staging
+      REDIS_URL: redis://redis-staging:6379
+      NEXT_PUBLIC_API_URL: http://localhost:3002/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - postgres-staging
+      - redis-staging
+    networks:
+      - staging-net
+    command: npm run dev
+
+  # PostgreSQL
+  postgres-staging:
+    image: postgres:15-alpine
+    container_name: soberlivings-staging-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: soberlivings_staging
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+    networks:
+      - staging-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis-staging:
+    image: redis:7-alpine
+    container_name: soberlivings-staging-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - staging_redis_data:/data
+    networks:
+      - staging-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

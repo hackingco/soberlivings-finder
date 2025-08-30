@@ -1,0 +1,24 @@
+# Test configuration for CI/CD
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: npm run test:ci
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/soberlivings_test
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    environment:
+      POSTGRES_DB: soberlivings_test
+
+  redis:
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
