@@ -1,0 +1,113 @@
+[0;32m[2025-08-29 20:53:06] Starting staging deployment...[0m
+[0;32m[2025-08-29 20:53:06] Running pre-deployment checks...[0m
+
+Parse error: bad expression
+    <stdin>:1
+
+[0;32m[2025-08-29 20:53:07] Pre-deployment checks passed[0m
+[0;32m[2025-08-29 20:53:07] Creating backup of current deployment...[0m
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_SERVICE_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"FIRECRAWL_API_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_SERVICE_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"FIRECRAWL_API_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:07-07:00" level=warning msg="/Users/shaight/claude-projects/soberlivings/docker-compose.staging.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+[0;34m[INFO] Backing up volumes...[0m
+[0;32m[2025-08-29 20:53:32] Backup created at ./backups/staging/staging-backup-20250829-205307[0m
+[0;32m[2025-08-29 20:53:32] Building and pulling Docker images...[0m
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_SERVICE_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"FIRECRAWL_API_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"SUPABASE_SERVICE_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:32-07:00" level=warning msg="The \"FIRECRAWL_API_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:33-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:33-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:33-07:00" level=warning msg="The \"SUPABASE_URL\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:33-07:00" level=warning msg="The \"SUPABASE_ANON_KEY\" variable is not set. Defaulting to a blank string."
+time="2025-08-29T20:53:33-07:00" level=warning msg="/Users/shaight/claude-projects/soberlivings/docker-compose.staging.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ app Skipped - No image to be pulled 
+ nginx-staging Pulling 
+ prometheus-staging Pulling 
+ grafana-staging Pulling 
+ postgres-staging Pulling 
+ redis-staging Pulling 
+ elasticsearch-staging Pulling 
+ redis-staging Pulled 
+ elasticsearch-staging Pulled 
+ 1d5252f66ea9 Pulling fs layer 
+ 024ad9bec3dc Pulling fs layer 
+ 5fd873abf5f6 Pulling fs layer 
+ ffe9a34510c5 Pulling fs layer 
+ 66791212fee3 Pulling fs layer 
+ d6c53d590081 Pulling fs layer 
+ dc1d320348fe Pulling fs layer 
+ 287863565429 Pulling fs layer 
+ 0b4681647db9 Pulling fs layer 
+ 66791212fee3 Waiting 
+ a26a02baf446 Pulling fs layer 
+ d6c53d590081 Waiting 
+ dc1d320348fe Waiting 
+ 287863565429 Waiting 
+ ffe9a34510c5 Waiting 
+ 0b4681647db9 Waiting 
+ f23143843495 Pulling fs layer 
+ a26a02baf446 Waiting 
+ f23143843495 Waiting 
+ 25d55513df53 Pulling fs layer 
+ f8aea60fd961 Pulling fs layer 
+ 547fae9beaca Pulling fs layer 
+ 4f4fb700ef54 Pulling fs layer 
+ 3f6395273557 Pulling fs layer 
+ 3c21d830a42f Pulling fs layer 
+ 25d55513df53 Waiting 
+ f8aea60fd961 Waiting 
+ 547fae9beaca Waiting 
+ 4f4fb700ef54 Waiting 
+ 3f6395273557 Waiting 
+ 3c21d830a42f Waiting 
+ 6e174226ea69 Already exists 
+ 6e174226ea69 Already exists 
+ 49f3b06c840f Pulling fs layer 
+ 04ba7957f9d2 Pulling fs layer 
+ 6156ecb6dfff Pulling fs layer 
+ 0bc2f07fbf03 Pulling fs layer 
+ 6c2c01fdb094 Pulling fs layer 
+ 66ce170f7dd8 Pulling fs layer 
+ 49f3b06c840f Waiting 
+ 021cb5923c0e Pulling fs layer 
+ 6c2c01fdb094 Waiting 
+ 6156ecb6dfff Waiting 
+ 0bc2f07fbf03 Waiting 
+ 021cb5923c0e Waiting 
+ 04ba7957f9d2 Waiting 
+ 66ce170f7dd8 Waiting 
+ 3540d00d3a8d Pulling fs layer 
+ 464d91115c2e Pulling fs layer 
+ 4f4fb700ef54 Pulling fs layer 
+ ded2bfdd8adf Pulling fs layer 
+ 9f1d07f40523 Pulling fs layer 
+ c049b4b5b81d Pulling fs layer 
+ 6b1ef42fa3bc Pulling fs layer 
+ 464d91115c2e Waiting 
+ 4f4fb700ef54 Waiting 
+ 7f46d17c4b0f Pulling fs layer 
+ ded2bfdd8adf Waiting 
+ 9f1d07f40523 Waiting 
+ 476716c10da1 Pulling fs layer 
+ 6b1ef42fa3bc Waiting 
+ c049b4b5b81d Waiting 
+ 3540d00d3a8d Waiting 
+ 7f46d17c4b0f Waiting 
+ 476716c10da1 Waiting 
+ 6ce8b87a9754 Already exists 
+ d2f8aae8d80e Already exists 

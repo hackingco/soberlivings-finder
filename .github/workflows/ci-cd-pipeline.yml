@@ -1,0 +1,553 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20.x'
+  PHP_VERSION: '8.2'
+
+jobs:
+  # ============================================================================
+  # Test and Validate
+  # ============================================================================
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: soberlivings_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run linter
+        working-directory: ./frontend
+        run: npm run lint || true
+
+      - name: Run type checking
+        working-directory: ./frontend
+        run: npm run type-check || true
+
+      - name: Setup test database
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/soberlivings_test
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      - name: Run tests
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/soberlivings_test
+          NODE_ENV: test
+        run: npm test -- --coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+
+  # ============================================================================
+  # Database Migrations - Staging
+  # ============================================================================
+  migrate-staging:
+    name: Deploy Migrations to Staging
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: ./frontend
+        run: npx prisma generate
+
+      - name: Deploy migrations to staging
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          echo "Deploying migrations to staging database..."
+          npx prisma migrate deploy
+
+      - name: Seed staging database (optional)
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          if [ "${{ github.event.inputs.seed }}" == "true" ]; then
+            echo "Seeding staging database..."
+            npm run db:seed
+          fi
+
+  # ============================================================================
+  # Database Migrations - Production
+  # ============================================================================
+  migrate-production:
+    name: Deploy Migrations to Production
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: ./frontend
+        run: npx prisma generate
+
+      - name: Deploy migrations to production
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "Deploying migrations to production database..."
+          npx prisma migrate deploy
+
+  # ============================================================================
+  # Supabase Sync
+  # ============================================================================
+  supabase-sync:
+    name: Sync with Supabase
+    runs-on: ubuntu-latest
+    needs: [migrate-production]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Generate SQL from Prisma
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npx prisma migrate diff \
+            --from-empty \
+            --to-schema-datamodel prisma/schema.prisma \
+            --script > ../supabase/migrations/$(date +%Y%m%d_%H%M%S)_ci_sync.sql
+
+      - name: Push to Supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+          supabase db push --password $SUPABASE_DB_PASSWORD
+
+  # ============================================================================
+  # Build Application
+  # ============================================================================
+  build-app:
+    name: Build Next.js Application
+    runs-on: ubuntu-latest
+    needs: test
+    
+    strategy:
+      matrix:
+        environment: [staging, production]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Set environment variables
+        run: |
+          if [ "${{ matrix.environment }}" == "production" ]; then
+            echo "Using production environment"
+            cp frontend/.env.production.supabase frontend/.env.production
+          else
+            echo "Using staging environment"
+            cp frontend/.env.production.localdb frontend/.env.production
+          fi
+
+      - name: Build application
+        working-directory: ./frontend
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ matrix.environment == 'production' && secrets.PRODUCTION_DATABASE_URL || secrets.STAGING_DATABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          npx prisma generate
+          npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build-${{ matrix.environment }}
+          path: |
+            frontend/.next/
+            frontend/public/
+            frontend/package.json
+            frontend/package-lock.json
+            frontend/next.config.js
+
+  # ============================================================================
+  # Build WordPress Plugin
+  # ============================================================================
+  build-wordpress-plugin:
+    name: Build WordPress Plugin
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          coverage: none
+
+      - name: Get composer cache directory
+        id: composer-cache
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Build plugin assets
+        working-directory: ./wordpress-plugin/plugins/sober-living-portal
+        run: |
+          # If you have any asset compilation steps, add them here
+          # npm ci && npm run build
+          echo "Plugin assets built"
+
+      - name: Create plugin ZIP
+        run: |
+          cd wordpress-plugin/plugins
+          zip -r sober-living-portal.zip sober-living-portal \
+            -x "*/.*" \
+            -x "*/tests/*" \
+            -x "*/node_modules/*" \
+            -x "*/composer.json" \
+            -x "*/composer.lock" \
+            -x "*/package.json" \
+            -x "*/package-lock.json" \
+            -x "*/phpunit.xml" \
+            -x "*/README.md"
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-plugin
+          path: wordpress-plugin/plugins/sober-living-portal.zip
+
+  # ============================================================================
+  # Deploy to Staging
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-app, migrate-staging]
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment: staging
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build-staging
+
+      - name: Deploy to staging server
+        run: |
+          echo "Deploying to staging environment..."
+          
+          # Create deployment script
+          cat > deploy-staging.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          # Navigate to project directory
+          cd /var/www/soberlivings
+          
+          # Pull latest code
+          git fetch origin
+          git reset --hard origin/develop
+          
+          # Update environment file
+          cp .env.staging .env
+          
+          # Pull and rebuild containers
+          docker compose -f docker-compose.staging.yml pull
+          docker compose -f docker-compose.staging.yml build --no-cache app
+          
+          # Stop old containers and start new ones
+          docker compose -f docker-compose.staging.yml down
+          docker compose -f docker-compose.staging.yml up -d
+          
+          # Wait for services to be ready
+          sleep 15
+          
+          # Run database migrations
+          docker compose -f docker-compose.staging.yml exec -T app npx prisma migrate deploy
+          
+          # Run health checks
+          docker compose -f docker-compose.staging.yml exec -T app curl -f http://localhost:3002/api/health || exit 1
+          
+          echo "Staging deployment completed successfully!"
+          EOF
+          
+          # Deploy via SSH
+          ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_SERVER_USER }}@${{ secrets.STAGING_SERVER_HOST }} 'bash -s' < deploy-staging.sh
+          rm deploy-staging.sh
+
+      - name: Health check
+        run: |
+          echo "Running health check on staging..."
+          curl -f ${{ secrets.STAGING_URL }}/api/health || exit 1
+
+  # ============================================================================
+  # Deploy to Production
+  # ============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-app, migrate-production, supabase-sync]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build-production
+
+      - name: Deploy to production server
+        run: |
+          echo "Deploying to production environment..."
+          
+          # Create production deployment script with blue-green strategy
+          cat > deploy-production.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          # Configuration
+          DEPLOY_DIR="/var/www/soberlivings"
+          BACKUP_DIR="/var/backups/soberlivings"
+          
+          # Navigate to project directory
+          cd $DEPLOY_DIR
+          
+          # Create backup
+          mkdir -p $BACKUP_DIR
+          docker compose exec postgres pg_dump -U postgres soberlivings > $BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).sql
+          
+          # Pull latest code
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Update environment file
+          cp .env.production .env
+          
+          # Build new image
+          docker compose build --no-cache app
+          
+          # Blue-Green deployment
+          # Start new container alongside old one
+          docker compose up -d --scale app=2 --no-recreate
+          
+          # Wait for new container to be healthy
+          sleep 30
+          
+          # Run migrations on new container
+          NEW_CONTAINER=$(docker compose ps -q app | head -n1)
+          docker exec -t $NEW_CONTAINER npx prisma migrate deploy
+          
+          # Health check new container
+          docker exec -t $NEW_CONTAINER curl -f http://localhost:3000/api/health || {
+            echo "Health check failed, rolling back..."
+            docker compose up -d --scale app=1
+            exit 1
+          }
+          
+          # Switch traffic to new container
+          docker compose restart nginx
+          
+          # Remove old container
+          docker compose up -d --scale app=1 --force-recreate
+          
+          # Clean up old images
+          docker image prune -f
+          
+          echo "Production deployment completed successfully!"
+          EOF
+          
+          # Deploy via SSH with error handling
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_SERVER_USER }}@${{ secrets.PRODUCTION_SERVER_HOST }} 'bash -s' < deploy-production.sh || {
+            echo "Deployment failed! Check server logs for details."
+            exit 1
+          }
+          rm deploy-production.sh
+
+      - name: Health check
+        run: |
+          echo "Running health check on production..."
+          curl -f ${{ secrets.PRODUCTION_URL }}/api/health || exit 1
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "Production deployment successful!"
+          # Add notification logic (Slack, Discord, email, etc.)
+
+  # ============================================================================
+  # Create Release
+  # ============================================================================
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-wordpress-plugin, deploy-production]
+    if: github.event_name == 'release' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download WordPress plugin
+        uses: actions/download-artifact@v4
+        with:
+          name: wordpress-plugin
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build-production
+          path: nextjs-build
+
+      - name: Create application bundle
+        run: |
+          tar -czf soberlivings-app-${{ github.sha }}.tar.gz nextjs-build/
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## What's Changed" > changelog.md
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0)..HEAD >> changelog.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            sober-living-portal.zip
+            soberlivings-app-${{ github.sha }}.tar.gz
+          body_path: changelog.md
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
+
+  # ============================================================================
+  # Cleanup
+  # ============================================================================
+  cleanup:
+    name: Cleanup Old Artifacts
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [create-release]
+    
+    steps:
+      - name: Delete old artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            coverage-report
+            nextjs-build-staging
+            nextjs-build-production
+            wordpress-plugin
+          failOnError: false

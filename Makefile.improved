@@ -1,0 +1,222 @@
+# Enhanced Makefile for Docker Workflow
+# Production-grade development and deployment commands
+
+.PHONY: help dev prod build test clean logs monitor deploy rollback backup restore shell debug metrics
+
+# Variables
+COMPOSE_DEV := docker-compose.yml docker-compose.override.yml
+COMPOSE_PROD := docker-compose.yml
+COMPOSE_MONITOR := docker-compose.yml docker-compose.monitoring.yml
+COMPOSE_TEST := docker-compose.yml docker-compose.test.yml
+
+# Colors for output
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[1;33m
+NC := \033[0m # No Color
+
+# Default target
+help:
+	@echo "$(GREEN)Sober Living Facilities - Enhanced Docker Workflow$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Development Commands:$(NC)"
+	@echo "  make dev         - Start development environment with hot-reload"
+	@echo "  make dev-monitor - Start development with full monitoring stack"
+	@echo "  make shell       - Open shell in app container"
+	@echo "  make debug       - Start with debugging enabled"
+	@echo "  make logs        - Follow container logs"
+	@echo ""
+	@echo "$(YELLOW)Production Commands:$(NC)"
+	@echo "  make prod        - Start production environment"
+	@echo "  make deploy      - Deploy with health checks and rollback"
+	@echo "  make rollback    - Rollback to previous deployment"
+	@echo ""
+	@echo "$(YELLOW)Testing Commands:$(NC)"
+	@echo "  make test        - Run tests in containers"
+	@echo "  make test-watch  - Run tests with watch mode"
+	@echo "  make lint        - Run linting checks"
+	@echo "  make security    - Run security scans"
+	@echo ""
+	@echo "$(YELLOW)Maintenance Commands:$(NC)"
+	@echo "  make build       - Build all Docker images"
+	@echo "  make clean       - Stop and remove all containers/volumes"
+	@echo "  make backup      - Backup database and volumes"
+	@echo "  make restore     - Restore from backup"
+	@echo "  make health      - Check health of all services"
+	@echo "  make metrics     - Display resource metrics"
+	@echo ""
+	@echo "$(YELLOW)Database Commands:$(NC)"
+	@echo "  make db-migrate  - Run database migrations"
+	@echo "  make db-seed     - Seed database with sample data"
+	@echo "  make db-reset    - Reset database (CAUTION!)"
+	@echo "  make db-shell    - Open PostgreSQL shell"
+	@echo ""
+
+# Development environment
+dev:
+	@echo "$(GREEN)Starting development environment...$(NC)"
+	@docker-compose -f $(COMPOSE_DEV) up
+	@make health
+
+# Development with monitoring
+dev-monitor:
+	@echo "$(GREEN)Starting development with monitoring...$(NC)"
+	@docker-compose -f $(COMPOSE_MONITOR) -f docker-compose.override.yml up
+	@echo ""
+	@echo "$(GREEN)Services available at:$(NC)"
+	@echo "  App:        http://localhost:3000"
+	@echo "  Grafana:    http://localhost:3001 (admin/admin)"
+	@echo "  Prometheus: http://localhost:9090"
+	@echo "  Adminer:    http://localhost:8080"
+	@echo "  MailHog:    http://localhost:8025"
+
+# Production environment
+prod:
+	@echo "$(GREEN)Starting production environment...$(NC)"
+	@docker-compose -f $(COMPOSE_PROD) up -d
+	@make health
+
+# Build images
+build:
+	@echo "$(GREEN)Building Docker images...$(NC)"
+	@docker-compose -f $(COMPOSE_PROD) build --no-cache
+
+# Run tests
+test:
+	@echo "$(GREEN)Running tests in containers...$(NC)"
+	@docker-compose -f $(COMPOSE_TEST) up --abort-on-container-exit
+	@docker-compose -f $(COMPOSE_TEST) down
+
+# Test with watch mode
+test-watch:
+	@echo "$(GREEN)Running tests with watch mode...$(NC)"
+	@docker-compose -f $(COMPOSE_TEST) run --rm app npm run test:watch
+
+# Linting
+lint:
+	@echo "$(GREEN)Running linting checks...$(NC)"
+	@docker-compose run --rm app npm run lint
+
+# Security scanning
+security:
+	@echo "$(GREEN)Running security scans...$(NC)"
+	@docker run --rm -v "$(PWD)":/src \
+		aquasec/trivy filesystem --severity HIGH,CRITICAL /src
+
+# Clean everything
+clean:
+	@echo "$(YELLOW)Cleaning up Docker resources...$(NC)"
+	@docker-compose -f $(COMPOSE_DEV) down -v
+	@docker system prune -f
+	@echo "$(GREEN)Cleanup complete!$(NC)"
+
+# View logs
+logs:
+	@docker-compose logs -f --tail=100
+
+# Deployment with health checks
+deploy:
+	@echo "$(GREEN)Deploying application...$(NC)"
+	@./scripts/docker-deploy.sh
+
+# Rollback deployment
+rollback:
+	@echo "$(YELLOW)Rolling back deployment...$(NC)"
+	@docker-compose -f $(COMPOSE_PROD) down
+	@if [ -f .docker-backup/docker-compose.yml ]; then \
+		cp .docker-backup/docker-compose.yml docker-compose.yml; \
+		docker-compose -f $(COMPOSE_PROD) up -d; \
+		echo "$(GREEN)Rollback complete!$(NC)"; \
+	else \
+		echo "$(RED)No backup found!$(NC)"; \
+	fi
+
+# Backup volumes
+backup:
+	@echo "$(GREEN)Backing up volumes...$(NC)"
+	@mkdir -p backups
+	@docker run --rm -v soberlivings_postgres_data:/data \
+		-v $(PWD)/backups:/backup alpine \
+		tar czf /backup/postgres-backup-$$(date +%Y%m%d-%H%M%S).tar.gz -C /data .
+	@echo "$(GREEN)Backup complete!$(NC)"
+
+# Restore from backup
+restore:
+	@echo "$(YELLOW)Restoring from backup...$(NC)"
+	@if [ -z "$(BACKUP_FILE)" ]; then \
+		echo "$(RED)Please specify BACKUP_FILE=<filename>$(NC)"; \
+		exit 1; \
+	fi
+	@docker run --rm -v soberlivings_postgres_data:/data \
+		-v $(PWD)/backups:/backup alpine \
+		tar xzf /backup/$(BACKUP_FILE) -C /data
+	@echo "$(GREEN)Restore complete!$(NC)"
+
+# Shell access
+shell:
+	@docker-compose exec app sh
+
+# Debug mode
+debug:
+	@echo "$(GREEN)Starting in debug mode...$(NC)"
+	@docker-compose -f $(COMPOSE_DEV) run --rm -p 9229:9229 app npm run debug
+
+# Health check
+health:
+	@echo "$(GREEN)Checking service health...$(NC)"
+	@docker-compose ps
+	@echo ""
+	@echo "$(GREEN)Health endpoints:$(NC)"
+	@curl -s http://localhost:3000/api/health || echo "App: $(RED)Unhealthy$(NC)"
+	@echo ""
+
+# Resource metrics
+metrics:
+	@echo "$(GREEN)Container resource usage:$(NC)"
+	@docker stats --no-stream
+
+# Database migrations
+db-migrate:
+	@echo "$(GREEN)Running database migrations...$(NC)"
+	@docker-compose exec app npx prisma migrate deploy
+
+# Database seeding
+db-seed:
+	@echo "$(GREEN)Seeding database...$(NC)"
+	@docker-compose exec app npm run db:seed
+
+# Database reset
+db-reset:
+	@echo "$(RED)WARNING: This will delete all data!$(NC)"
+	@read -p "Are you sure? (y/N) " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker-compose exec app npx prisma migrate reset --force; \
+	fi
+
+# Database shell
+db-shell:
+	@docker-compose exec postgres psql -U postgres -d soberlivings
+
+# Monitor services
+monitor:
+	@echo "$(GREEN)Opening monitoring dashboards...$(NC)"
+	@open http://localhost:3001 # Grafana
+	@open http://localhost:9090 # Prometheus
+	@open http://localhost:8080 # Adminer
+
+# Quick restart
+restart:
+	@echo "$(GREEN)Restarting services...$(NC)"
+	@docker-compose restart
+
+# Update images
+update:
+	@echo "$(GREEN)Updating Docker images...$(NC)"
+	@docker-compose pull
+	@make build
+
+# Show ports
+ports:
+	@echo "$(GREEN)Service ports:$(NC)"
+	@docker-compose ps --format "table {{.Name}}\t{{.Ports}}"

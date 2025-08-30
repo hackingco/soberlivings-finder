@@ -25,3 +25,13 @@ claude-flow
 claude-flow.bat
 claude-flow.ps1
 hive-mind-prompt-*.txt
+
+# Environment files with credentials
+frontend/.env.local
+frontend/.env.production
+frontend/.env.production.localdb
+frontend/.env.production.supabase
+
+# Supabase access tokens
+.supabase/
+SUPABASE_ACCESS_TOKEN
