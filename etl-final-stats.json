@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-08-29T20:08:06.285Z",
+  "sessionFetched": 6000,
+  "sessionInserted": 3673,
+  "sessionSkipped": 2327,
+  "dbTotal": 8524,
+  "duration": 67.679,
+  "citiesProcessed": 20,
+  "stateBreakdown": [
+    {
+      "state": "CA",
+      "count": "920"
+    },
+    {
+      "state": "FL",
+      "count": "481"
+    },
+    {
+      "state": "IL",
+      "count": "444"
+    },
+    {
+      "state": "OH",
+      "count": "410"
+    },
+    {
+      "state": "NC",
+      "count": "397"
+    },
+    {
+      "state": "NY",
+      "count": "394"
+    },
+    {
+      "state": "PA",
+      "count": "385"
+    },
+    {
+      "state": "TX",
+      "count": "373"
+    },
+    {
+      "state": "AZ",
+      "count": "347"
+    },
+    {
+      "state": "NJ",
+      "count": "315"
+    },
+    {
+      "state": "MA",
+      "count": "314"
+    },
+    {
+      "state": "MD",
+      "count": "296"
+    },
+    {
+      "state": "WA",
+      "count": "272"
+    },
+    {
+      "state": "GA",
+      "count": "240"
+    },
+    {
+      "state": "MN",
+      "count": "232"
+    }
+  ]
+}

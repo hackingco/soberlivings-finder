@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-08-29T20:27:07.237Z",
+  "totalFacilities": 8524,
+  "citiesTested": 10,
+  "totalTests": 70,
+  "passed": 40,
+  "failed": 0,
+  "successRate": "57.1%",
+  "topCitiesCoverage": [
+    {
+      "city": "Los Angeles, CA",
+      "facilities": 59,
+      "apiWorking": true
+    },
+    {
+      "city": "New York, NY",
+      "facilities": 71,
+      "apiWorking": true
+    },
+    {
+      "city": "Chicago, IL",
+      "facilities": 94,
+      "apiWorking": true
+    },
+    {
+      "city": "Houston, TX",
+      "facilities": 44,
+      "apiWorking": true
+    },
+    {
+      "city": "Phoenix, AZ",
+      "facilities": 66,
+      "apiWorking": true
+    },
+    {
+      "city": "Philadelphia, PA",
+      "facilities": 43,
+      "apiWorking": true
+    },
+    {
+      "city": "San Antonio, TX",
+      "facilities": 23,
+      "apiWorking": true
+    },
+    {
+      "city": "San Diego, CA",
+      "facilities": 33,
+      "apiWorking": true
+    },
+    {
+      "city": "Dallas, TX",
+      "facilities": 22,
+      "apiWorking": true
+    },
+    {
+      "city": "San Jose, CA",
+      "facilities": 13,
+      "apiWorking": true
+    }
+  ],
+  "performance": {
+    "avgDatabaseQuery": "6.90ms",
+    "avgAPIResponse": "190.43ms"
+  }
+}

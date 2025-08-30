@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-29T19:54:50.484Z",
+  "totalFetched": null,
+  "totalInserted": 0,
+  "duplicatesSkipped": 0,
+  "duration": 157.337,
+  "locationsProcessed": 132,
+  "statesCovered": 51,
+  "databaseTotal": 10
+}
